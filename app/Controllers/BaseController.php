@@ -44,13 +44,13 @@ abstract class BaseController extends Controller
     }
 
     protected function tulis_log($aksi, $modul)
-{
-    $db = \Config\Database::connect();
-    $db->table('tb_log_aktivitas')->insert([
-        'id_user' => 1, // Sementara hardcode ID Admin Anda
-        'aksi'    => $aksi,
-        'modul'   => $modul,
-        'waktu'   => date('Y-m-d H:i:s')
-    ]);
-}
+    {
+        $db = \Config\Database::connect();
+        $db->table('tb_log_aktivitas')->insert([
+            'id_user' => session()->get('id_user') ?? 1, // Mengambil ID orang yang sedang login
+            'aksi'    => $aksi,
+            'modul'   => $modul,
+            'waktu'   => date('Y-m-d H:i:s')
+        ]);
+    }
 }

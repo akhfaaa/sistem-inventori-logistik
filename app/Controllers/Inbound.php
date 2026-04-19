@@ -1,42 +1,69 @@
 <?php
 
 namespace App\Controllers;
+
+use App\Models\SpkModel;
 use App\Models\BarangModel;
 
-class Inbound extends BaseController {
-    public function index() {
+class Inbound extends BaseController
+{
+    public function index()
+    {
         $db = \Config\Database::connect();
-        $data = [
-            'title'    => 'Transaksi Inbound | Barang Masuk',
-            'barang'   => $db->table('tb_barang')->get()->getResultArray(),
-            'supplier' => $db->table('tb_supplier')->get()->getResultArray(),
-            'riwayat'  => $db->table('tb_masuk m')
-                            ->select('m.*, b.nama_barang, s.nama_supplier')
-                            ->join('tb_barang b', 'b.id_barang = m.id_barang')
-                            ->join('tb_supplier s', 's.id_supplier = m.id_supplier')
-                            ->orderBy('m.tanggal_masuk', 'DESC')->get()->getResultArray()
-        ];
-        return view('inbound/index', $data);
+
+        // 1. Ambil Data Barang & Supplier untuk Dropdown
+        $data['barang']   = $db->table('tb_barang')->get()->getResultArray();
+        $data['supplier'] = $db->table('tb_supplier')->get()->getResultArray();
+
+        // 2. Ambil Riwayat Transaksi Masuk (Join untuk informasi lengkap)
+        $data['riwayat']  = $db->table('tb_masuk m')
+            ->select('m.*, b.nama_barang, s.nama_supplier')
+            ->join('tb_barang b', 'b.id_barang = m.id_barang')
+            ->join('tb_supplier s', 's.id_supplier = m.id_supplier')
+            ->orderBy('m.tanggal_masuk', 'DESC')
+            ->limit(10)
+            ->get()->getResultArray();
+
+        // 3. Hitung Rekomendasi SPK SAW
+        $spkModel = new SpkModel();
+        $rekomendasi = $spkModel->hitungSAW();
+        
+        // Ambil peringkat pertama (skor tertinggi) sebagai rekomendasi utama
+        $data['best_supplier'] = !empty($rekomendasi) ? $rekomendasi[0] : null;
+
+        $data['title'] = 'Stock Inbound | Logistics Hub';
+        return view('Inbound/index', $data);
     }
 
-    public function store() {
-    $db = \Config\Database::connect();
-    $id_barang = $this->request->getPost('id_barang');
-    $qty = $this->request->getPost('qty_masuk');
+    public function store()
+    {
+        $db = \Config\Database::connect();
+        $barangModel = new BarangModel();
 
-    $db->table('tb_masuk')->insert([
-        'id_barang'   => $id_barang,
-        'id_supplier' => $this->request->getPost('id_supplier'),
-        'id_user'     => 1,
-        'qty_masuk'   => $qty
-    ]);
+        $id_barang   = $this->request->getPost('id_barang');
+        $id_supplier = $this->request->getPost('id_supplier');
+        $qty_masuk   = $this->request->getPost('qty_masuk');
 
-    // Update stok
-    $db->table('tb_barang')->where('id_barang', $id_barang)->set('stok_aktual', "stok_aktual + $qty", false)->update();
+        // 1. Ambil data barang untuk mendapatkan nama (keperluan log)
+        $barang = $db->table('tb_barang')->where('id_barang', $id_barang)->get()->getRowArray();
 
-    // Tulis Log Aktivitas
-    $this->tulis_log("Menambah stok barang ID: $id_barang sebanyak $qty", "Inbound");
+        // 2. Simpan Transaksi Masuk
+        $db->table('tb_masuk')->insert([
+            'id_barang'     => $id_barang,
+            'id_supplier'   => $id_supplier,
+            'qty_masuk'     => $qty_masuk,
+            'tanggal_masuk' => date('Y-m-d H:i:s')
+        ]);
 
-    return redirect()->to('/inbound')->with('success', 'Stok berhasil ditambah!');
-}
+        // 3. Update Stok di Tabel Barang (Increment)
+        $db->table('tb_barang')
+           ->where('id_barang', $id_barang)
+           ->set('stok_aktual', "stok_aktual + $qty_masuk", false)
+           ->update();
+
+        // 4. Catat ke Audit Log
+        $this->tulis_log("Input barang masuk: {$barang['nama_barang']} (+{$qty_masuk})", "Inbound");
+
+        return redirect()->to('/inbound')->with('success', 'Stok berhasil ditambahkan ke gudang.');
+    }
 }
