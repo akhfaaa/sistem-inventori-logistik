@@ -54,7 +54,7 @@
 
     <div class="hidden lg:flex w-1/2 bg-slate-900 relative justify-center items-center overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 opacity-90 z-0"></div>
-        <div class="absolute inset-0 opacity-20 z-0" style="background-image: radial-gradient(#4f46e5 1px, transparent 1px); background-size: 32px 32px;"></div>
+        <div class="absolute inset-0 opacity-20 z-0" style="background-image: radial-gradient(#003366 1px, transparent 1px); background-size: 32px 32px;"></div>
         
         <div class="z-10 text-center px-12 max-w-xl">
             <h2 class="text-4xl font-extrabold text-white tracking-tight mb-6 leading-tight">Optimasi Inventori dengan Kecerdasan Buatan.</h2>

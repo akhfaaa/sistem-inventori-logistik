@@ -4,11 +4,10 @@ namespace App\Controllers;
 
 class Laporan extends BaseController
 {
-   public function index()
+    public function index()
     {
         $db = \Config\Database::connect();
         
-        // Ambil rekap jumlah barang per klaster K-Means untuk visualisasi Chart.js
         $data['kmeans_chart'] = $db->table('tb_klaster_kmeans')
                                    ->select('label_klaster, COUNT(*) as total')
                                    ->groupBy('label_klaster')
@@ -22,47 +21,58 @@ class Laporan extends BaseController
     {
         $db = \Config\Database::connect();
         
-        // Mapping Judul Laporan agar lebih rapi di PDF
         $mapJudul = [
-            'inventori_master'    => 'Laporan Master Inventory Recap',
-            'stok_kritis'         => 'Laporan Critical Stock Alerts',
-            'inbound_rekap'       => 'Laporan Rekapitulasi Inbound Volume',
-            'outbound_rekap'      => 'Laporan Rekapitulasi Outbound Volume',
-            'valuasi_aset'        => 'Laporan Valuasi Aset Gudang (Warehouse Valuation)',
-            'kinerja_supplier'    => 'Laporan Metrik Kinerja Supplier',
-            'distribusi_customer' => 'Laporan Distribusi & Serapan Customer',
-            'analitik_kmeans'     => 'Laporan Analitik Klasterisasi K-Means'
+            'master_inventori' => '1. Laporan Master Inventori Global',
+            'barang_masuk'     => '2. Laporan Transaksi Barang Masuk',
+            'barang_keluar'    => '3. Laporan Distribusi Barang Keluar',
+            'stok_kritis'      => '4. Laporan Ambang Batas Keselamatan (Restock Alert)',
+            'fast_moving'      => '5. Laporan Kinerja Klaster: Fast Moving Items',
+            'slow_moving'      => '6. Laporan Kinerja Klaster: Slow Moving Items',
+            'dead_stock'       => '7. Laporan Indikasi Kerugian: Dead Stock Items',
+            'retur_audit'      => '8. Laporan Audit Pengembalian (Retur Barang)',
+            'kinerja_supplier' => '9. Laporan Jejak Rekam Kinerja Pemasok',
+            'valuasi_aset'     => '10. Laporan Nilai Valuasi Aset Gudang Terkini',
+            'system_log'       => '11. Laporan Jejak Audit Aktivitas Pengguna'
         ];
 
         $data['judul_laporan'] = $mapJudul[$tipe] ?? 'Laporan Manajerial Logistik';
         $data['tanggal_cetak'] = date('d F Y - H:i:s');
+        $data['pencetak']      = session()->get('nama_lengkap') ?? 'Administrator';
+        $data['role']          = session()->get('role') ?? 'Admin';
 
-        // ... [Masukkan blok SWITCH CASE yang ada di jawaban sebelumnya di sini] ...
-        
         switch ($tipe) {
-            case 'inventori_master':
-                $data['laporan'] = $db->table('tb_barang b')->select('b.kode_barang, b.nama_barang, k.nama_kategori, b.stok_aktual')->join('tb_kategori k', 'k.id_kategori = b.id_kategori')->get()->getResultArray();
+            case 'master_inventori':
+                $data['laporan'] = $db->table('tb_barang b')->select('b.kode_barang AS "Kode SKU", b.nama_barang AS "Identitas Produk", k.nama_kategori AS "Kategori", b.stok_aktual AS "Stok Tersedia"')->join('tb_kategori k', 'k.id_kategori = b.id_kategori', 'left')->get()->getResultArray();
+                break;
+            case 'barang_masuk':
+                $data['laporan'] = $db->table('tb_masuk m')->select('m.tanggal_masuk AS "Waktu Penerimaan", b.kode_barang AS "SKU", b.nama_barang AS "Nama Barang", s.nama_supplier AS "Pemasok", m.qty_masuk AS "Volume Masuk"')->join('tb_barang b', 'b.id_barang = m.id_barang')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->orderBy('m.tanggal_masuk', 'DESC')->get()->getResultArray();
+                break;
+            case 'barang_keluar':
+                $data['laporan'] = $db->table('tb_keluar k')->select('k.tanggal_keluar AS "Waktu Distribusi", b.kode_barang AS "SKU", b.nama_barang AS "Nama Barang", c.nama_customer AS "Tujuan/Customer", k.qty_keluar AS "Volume Keluar"')->join('tb_barang b', 'b.id_barang = k.id_barang')->join('tb_customer c', 'c.id_customer = k.id_customer')->orderBy('k.tanggal_keluar', 'DESC')->get()->getResultArray();
                 break;
             case 'stok_kritis':
-                $data['laporan'] = $db->table('tb_barang')->select('kode_barang, nama_barang, stok_aktual, batas_stok_kritis')->where('stok_aktual <= batas_stok_kritis')->get()->getResultArray();
+                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "Kode SKU", nama_barang AS "Nama Barang", batas_stok_kritis AS "Ambang Batas Kritis", stok_aktual AS "Sisa Stok Aktual"')->where('stok_aktual <= batas_stok_kritis')->get()->getResultArray();
                 break;
-            case 'inbound_rekap':
-                $data['laporan'] = $db->table('tb_masuk m')->select('b.nama_barang, s.nama_supplier, SUM(m.qty_masuk) as total_masuk')->join('tb_barang b', 'b.id_barang = m.id_barang')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->groupBy('m.id_barang, m.id_supplier')->get()->getResultArray();
+            case 'fast_moving':
+                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", k.velocity_score AS "Skor Velositas", b.stok_aktual AS "Stok Saat Ini"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Fast Moving')->orderBy('k.velocity_score', 'DESC')->get()->getResultArray();
                 break;
-            case 'outbound_rekap':
-                $data['laporan'] = $db->table('tb_keluar k')->select('b.nama_barang, c.nama_customer, SUM(k.qty_keluar) as total_keluar')->join('tb_barang b', 'b.id_barang = k.id_barang')->join('tb_customer c', 'c.id_customer = k.id_customer')->groupBy('k.id_barang, k.id_customer')->get()->getResultArray();
+            case 'slow_moving':
+                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", k.velocity_score AS "Skor Velositas", b.stok_aktual AS "Stok Menumpuk"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Slow Moving')->get()->getResultArray();
                 break;
-            case 'valuasi_aset':
-                $data['laporan'] = $db->table('tb_barang')->select('nama_barang, stok_aktual, harga_beli, (stok_aktual * harga_beli) as total_valuasi')->get()->getResultArray();
+            case 'dead_stock':
+                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", b.harga_beli AS "Harga Satuan (Rp)", b.stok_aktual AS "Stok Macet"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Dead Stock')->get()->getResultArray();
+                break;
+            case 'retur_audit':
+                $data['laporan'] = $db->table('tb_retur r')->select('r.tanggal_retur AS "Waktu Anomali", b.nama_barang AS "Produk Terkait", r.qty_retur AS "Volume", r.alasan AS "Keterangan", r.aksi_stok AS "Tindakan Sistem"')->join('tb_barang b', 'b.id_barang = r.id_barang')->orderBy('r.tanggal_retur', 'DESC')->get()->getResultArray();
                 break;
             case 'kinerja_supplier':
-                $data['laporan'] = $db->table('tb_masuk m')->select('s.nama_supplier, COUNT(m.id_masuk) as frekuensi_pengiriman, SUM(m.qty_masuk) as volume_barang')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->groupBy('m.id_supplier')->orderBy('volume_barang', 'DESC')->get()->getResultArray();
+                $data['laporan'] = $db->table('tb_masuk m')->select('s.nama_supplier AS "Identitas Pemasok", COUNT(m.id_masuk) AS "Frekuensi Transaksi", SUM(m.qty_masuk) AS "Total Volume Pasokan"')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->groupBy('m.id_supplier')->orderBy('Total Volume Pasokan', 'DESC')->get()->getResultArray();
                 break;
-            case 'distribusi_customer':
-                $data['laporan'] = $db->table('tb_keluar k')->select('c.nama_customer, SUM(k.qty_keluar) as volume_serapan')->join('tb_customer c', 'c.id_customer = k.id_customer')->groupBy('k.id_customer')->orderBy('volume_serapan', 'DESC')->get()->getResultArray();
+            case 'valuasi_aset':
+                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "SKU", nama_barang AS "Nama Produk", stok_aktual AS "Volume Aset", harga_beli AS "Nilai Satuan", (stok_aktual * harga_beli) AS "Total Nilai Kapital"')->get()->getResultArray();
                 break;
-            case 'analitik_kmeans':
-                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.nama_barang, k.label_klaster, k.velocity_score')->join('tb_barang b', 'b.id_barang = k.id_barang')->orderBy('k.label_klaster', 'ASC')->get()->getResultArray();
+            case 'system_log':
+                $data['laporan'] = $db->table('tb_log_aktivitas l')->select('l.waktu AS "Timestamp", u.nama_lengkap AS "Operator/User", l.modul AS "Modul Sistem", l.aksi AS "Jejak Aktivitas"')->join('tb_users u', 'u.id_user = l.id_user')->orderBy('l.waktu', 'DESC')->get()->getResultArray();
                 break;
             default:
                 $data['laporan'] = [];
@@ -74,21 +84,16 @@ class Laporan extends BaseController
         $html = view('laporan/cetak_pdf', $data);
 
         $dompdf = new \Dompdf\Dompdf();
-        // Set opsi agar DomPDF bisa me-render CSS dengan lebih baik
         $options = $dompdf->getOptions();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
         $dompdf->setOptions($options);
 
         $dompdf->loadHtml($html);
-        
-        // Kita gunakan Landscape karena tabel laporan biasanya lebar
         $dompdf->setPaper('A4', 'landscape'); 
         $dompdf->render();
 
-        $namaFile = "Report_" . strtoupper($tipe) . "_" . date('Ymd_Hi') . ".pdf";
-        
-        // Unduh otomatis
-        return $dompdf->stream($namaFile, ["Attachment" => true]);
+        $namaFile = "DOC_" . strtoupper($tipe) . "_" . date('Ymd_Hi') . ".pdf";
+        return $dompdf->stream($namaFile, ["Attachment" => false]); // Set true jika ingin langsung otomatis terunduh
     }
 }

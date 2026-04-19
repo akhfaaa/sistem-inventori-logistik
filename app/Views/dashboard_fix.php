@@ -5,7 +5,7 @@
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Logistics Hub <span class="text-indigo-600">Enterprise</span></h1>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Silabak <span class="text-indigo-600">Enterprise</span></h1>
             <p class="text-slate-500 mt-1.5 text-sm font-medium">Monitoring inventori cerdas didukung analitik spasial.</p>
         </div>
         <a href="<?= base_url('home/exportPDF') ?>" class="group flex items-center gap-2 bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300">

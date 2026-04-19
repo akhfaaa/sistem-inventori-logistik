@@ -1,49 +1,50 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Models\BarangModel;
 
 class Barang extends BaseController
 {
     public function index()
-{
-    $barangModel = new BarangModel();
-    
-    // Mengambil data barang dengan JOIN ke kategori agar tampilan lebih informatif
-    $db = \Config\Database::connect();
-    $builder = $db->table('tb_barang b');
-    $builder->select('b.*, k.nama_kategori');
-    $builder->join('tb_kategori k', 'k.id_kategori = b.id_kategori');
-    $semua_barang = $builder->get()->getResultArray();
+    {
+        $db = \Config\Database::connect();
 
-    // Mengambil list kategori untuk dropdown di Modal
-    $kategori = $db->table('tb_kategori')->get()->getResultArray();
+        // Inilah inti dari Langkah 3: Melakukan JOIN agar data lengkap
+        $data = [
+            'title'    => 'Master Inventory | SKU Management',
 
-    $data = [
-        'title'    => 'Master Barang | Logistik',
-        'barang'   => $semua_barang,
-        'kategori' => $kategori
-    ];
-    
-    return view('barang/index', $data);
-}
+            // Kita berikan alias 'b' untuk tb_barang agar query lebih pendek
+            'barang'   => $db->table('tb_barang b')
+                ->select('b.*, k.nama_kategori, r.nama_rak, r.lokasi')
+                ->join('tb_kategori k', 'k.id_kategori = b.id_kategori', 'left')
+                ->join('tb_rak r', 'r.id_rak = b.id_rak', 'left') // Inilah kolom yang tadi error
+                ->get()->getResultArray(),
+
+            // Data ini dikirim agar Dropdown di Modal Tambah Barang bisa muncul
+            'kategori' => $db->table('tb_kategori')->get()->getResultArray(),
+            'rak'      => $db->table('tb_rak')->get()->getResultArray()
+        ];
+
+        return view('barang/index', $data);
+    }
 
     public function store()
     {
-        // Memanggil Model Barang yang sudah kita buat sebelumnya
-        $barangModel = new BarangModel();
+        $db = \Config\Database::connect();
 
-        // Menangkap data dari Form HTML dan menyimpannya secara atomik
-        $barangModel->insert([
-            'kode_barang'       => $this->request->getPost('kode_barang'),
-            'nama_barang'       => $this->request->getPost('nama_barang'),
-            'id_kategori'       => $this->request->getPost('id_kategori'),
-            'harga_beli'        => $this->request->getPost('harga_beli'),
-            'stok_aktual'       => $this->request->getPost('stok_aktual'),
-            'batas_stok_kritis' => $this->request->getPost('batas_stok_kritis')
-        ]);
+        $dataInsert = [
+            'kode_barang'        => $this->request->getPost('kode_barang'),
+            'nama_barang'        => $this->request->getPost('nama_barang'),
+            'id_kategori'        => $this->request->getPost('id_kategori'),
+            'id_rak'             => $this->request->getPost('id_rak'), // Pastikan baris ini ada
+            'stok_aktual'        => $this->request->getPost('stok_aktual'),
+            'batas_stok_kritis'  => $this->request->getPost('batas_stok_kritis'),
+            'harga_beli'         => $this->request->getPost('harga_beli'),
+        ];
 
-        // Mengembalikan user ke halaman tabel setelah sukses menyimpan
-        return redirect()->to('/barang');
+        $db->table('tb_barang')->insert($dataInsert);
+
+        return redirect()->to('/barang')->with('success', 'SKU baru berhasil terdaftar dan ditempatkan di rak.');
     }
 }

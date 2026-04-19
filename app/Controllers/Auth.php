@@ -43,8 +43,23 @@ class Auth extends BaseController
 
     public function logout()
     {
-        $this->tulis_log("User logout dari sistem", "Autentikasi");
-        session()->destroy();
-        return redirect()->to('/auth');
+        $session = session();
+        
+        // (Opsional) Catat aktivitas logout ke tabel log sebelum sesi dihancurkan
+        if ($session->get('id_user')) {
+            $db = \Config\Database::connect();
+            $db->table('tb_log_aktivitas')->insert([
+                'id_user' => $session->get('id_user'),
+                'aksi'    => 'User logout dari sistem',
+                'modul'   => 'Autentikasi',
+                'waktu'   => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        // Hancurkan semua data sesi (login)
+        $session->destroy();
+
+        // Arahkan kembali ke halaman login dengan pesan sukses
+        return redirect()->to('/login')->with('success', 'Anda telah berhasil keluar dari sistem.');
     }
 }
