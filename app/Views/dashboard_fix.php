@@ -1,223 +1,244 @@
 <?= $this->extend('layout/main') ?>
 <?= $this->section('content') ?>
 
-<div class="min-h-screen bg-[#F8FAFC] p-4 sm:p-8 font-sans">
-    
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+<div class="max-w-[1400px] mx-auto px-4 py-8">
+
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Silabak <span class="text-indigo-600">Enterprise</span></h1>
-            <p class="text-slate-500 mt-1.5 text-sm font-medium">Monitoring inventori cerdas didukung analitik spasial.</p>
+            <div class="inline-flex items-center px-3 py-1 bg-slate-900 text-amber-400 text-[10px] font-black rounded-lg border border-slate-700 mb-3 uppercase tracking-widest shadow-sm">
+                Command Center: Bapekom Wilayah VII
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Logistik Terpadu</h1>
+            <p class="text-slate-500 text-sm mt-1.5 font-medium">Pantauan operasional inventori, peringatan stok, dan performa kecerdasan buatan secara real-time.</p>
         </div>
-        <a href="<?= base_url('home/exportPDF') ?>" class="group flex items-center gap-2 bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md text-slate-700 hover:text-indigo-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300">
-            <svg class="w-5 h-5 text-indigo-500 group-hover:-translate-y-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            Generate Executive Report
-        </a>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                </div>
-                <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">LIVE</span>
-            </div>
-            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Active SKU</p>
-            <p class="text-4xl font-extrabold text-slate-900"><?= $total_barang ?></p>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-bl-full -z-10"></div>
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-            </div>
-            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Critical Stock Level</p>
-            <div class="flex items-baseline gap-2">
-                <p class="text-4xl font-extrabold text-rose-600"><?= $low_stock ?></p>
-                <p class="text-sm font-medium text-slate-400">Items need attention</p>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-10"></div>
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Algorithm Status</p>
-            <p class="text-2xl font-bold text-emerald-600 mt-2">K-Means Optimal</p>
+        <div>
+            <a href="<?= base_url('home/exportPDF') ?>" target="_blank" class="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Ekspor Laporan Master
+            </a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        
-        <div class="lg:col-span-1 bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col">
-            <div class="mb-8">
-                <h3 class="text-lg font-bold text-slate-900">Cluster Distribution</h3>
-                <p class="text-sm text-slate-500 mt-1">Real-time K-Means grouping results</p>
-            </div>
-            
-            <?php if(empty($rekap_kmeans)): ?>
-                <div class="flex-1 flex flex-col items-center justify-center text-center p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <svg class="w-10 h-10 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                    <p class="text-sm text-slate-500 font-medium">Data analitik belum tersedia.</p>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-200 transition-all">
+                <div>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Master Aset</h3>
+                    <div class="flex items-end gap-2">
+                        <span class="text-5xl font-black text-slate-900 tracking-tighter"><?= $total_barang ?></span>
+                        <span class="text-xs font-bold text-slate-400 mb-1.5 uppercase">SKU Terdaftar</span>
+                    </div>
                 </div>
-            <?php else: ?>
-                <div class="space-y-6 flex-1">
-                    <?php foreach($rekap_kmeans as $r): 
-                        $colorClass = 'bg-slate-800';
-                        $bgSoft = 'bg-slate-100';
-                        if($r['label_klaster'] == 'Fast Moving') { $colorClass = 'bg-emerald-500'; $bgSoft = 'bg-emerald-50'; }
-                        if($r['label_klaster'] == 'Slow Moving') { $colorClass = 'bg-amber-400'; $bgSoft = 'bg-amber-50'; }
-                        if($r['label_klaster'] == 'Dead Stock') { $colorClass = 'bg-rose-500'; $bgSoft = 'bg-rose-50'; }
-                        
-                        $percentage = ($total_barang > 0) ? ($r['total'] / $total_barang) * 100 : 0;
+                <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-amber-400 transition-colors shadow-inner border border-slate-100 group-hover:border-slate-800">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-800 flex items-center justify-between relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-rose-500 <?= $low_stock > 0 ? 'animate-pulse' : '' ?>"></div>
+                        Peringatan Stok Kritis
+                    </h3>
+                    <div class="flex items-end gap-2">
+                        <span class="text-5xl font-black <?= $low_stock > 0 ? 'text-rose-500' : 'text-emerald-400' ?> tracking-tighter"><?= $low_stock ?></span>
+                        <span class="text-xs font-bold text-slate-500 mb-1.5 uppercase">Item Butuh Restock</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="md:col-span-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center">
+            <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4">Efisiensi Rotasi (AI)</h3>
+            <div class="space-y-3">
+                <?php
+                $colors = [
+                    'Fast Moving' => 'text-emerald-700 bg-emerald-50 border border-emerald-100',
+                    'Slow Moving' => 'text-amber-700 bg-amber-50 border border-amber-100',
+                    'Dead Stock'  => 'text-rose-700 bg-rose-50 border border-rose-100'
+                ];
+                if (empty($rekap_kmeans)): ?>
+                    <p class="text-xs text-slate-400 font-bold italic text-center py-4">Belum ada klasterisasi AI.</p>
+                    <?php else: foreach ($rekap_kmeans as $r):
+                        $theme = $colors[$r['label_klaster']] ?? 'text-slate-600 bg-slate-50 border border-slate-100';
                     ?>
-                    <div class="group p-4 rounded-xl <?= $bgSoft ?> border border-transparent hover:border-white transition-all">
-                        <div class="flex justify-between items-end mb-3">
-                            <span class="font-bold text-slate-800 tracking-tight"><?= $r['label_klaster'] ?></span>
-                            <div class="text-right">
-                                <span class="block text-xl font-extrabold text-slate-900 leading-none mb-1"><?= $r['total'] ?></span>
-                                <span class="text-xs font-semibold text-slate-500"><?= round($percentage) ?>% of Total</span>
+                        <div class="flex items-center justify-between p-3 rounded-xl <?= $theme ?>">
+                            <span class="text-[10px] font-black uppercase tracking-widest"><?= $r['label_klaster'] ?></span>
+                            <span class="text-lg font-black"><?= $r['total'] ?> <span class="text-[9px] opacity-70 font-bold uppercase">SKU</span></span>
+                        </div>
+                <?php endforeach;
+                endif; ?>
+            </div>
+        </div>
+
+        <div class="md:col-span-7 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between group">
+            <div class="flex justify-between items-start mb-8 border-b border-slate-50 pb-4">
+                <div>
+                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Peta Distribusi Aset</h3>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Sumbu X (Kecepatan Rotasi) vs Sumbu Y (Volume Aktual)</p>
+                </div>
+                <a href="<?= base_url('analitik') ?>" class="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest transition-colors flex items-center gap-1">
+                    Buka Modul AI &rarr;
+                </a>
+            </div>
+
+            <div class="h-[300px] w-full">
+                <canvas id="spatialChart"></canvas>
+            </div>
+        </div>
+
+        <div class="md:col-span-5 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Jejak Aktivitas Sistem</h3>
+            </div>
+
+            <div class="flex-1 space-y-4 overflow-y-auto pr-2">
+                <?php if (empty($recent_logs)): ?>
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter italic">
+                        Otoritas: <?= $log['nama_lengkap'] ?? 'Pegawai Nonaktif' ?> (<?= $log['modul'] ?? 'Umum' ?>)
+                    </span>
+                    <?php else: foreach ($recent_logs as $log): ?>
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center mt-1">
+                                <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                                <div class="w-px h-full bg-slate-200 my-1"></div>
+                            </div>
+                            <div class="pb-4">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100"><?= date('d M Y - H:i', strtotime($log['waktu'])) ?></span>
+                                <p class="text-[11px] font-bold text-slate-800 leading-snug mt-2 mb-1"><?= $log['aktivitas'] ?></p>
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-tighter italic">Otoritas: <?= $log['nama_lengkap'] ?? 'System' ?> (<?= $log['modul'] ?? 'Umum' ?>)</span>
                             </div>
                         </div>
-                        <div class="w-full bg-white/60 rounded-full h-2.5 overflow-hidden shadow-inner">
-                            <div class="<?= $colorClass ?> h-2.5 rounded-full transition-all duration-1000 ease-out" style="width: <?= $percentage ?>%"></div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                <?php endforeach;
+                endif; ?>
+            </div>
         </div>
 
-        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-            <div class="mb-6 flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900">Spatial Intelligence</h3>
-                    <p class="text-sm text-slate-500 mt-1">Velocity vs Actual Stock projection</p>
-                </div>
-                <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                </div>
-            </div>
-            <div class="relative w-full rounded-xl overflow-hidden" style="height: 420px;">
-                <canvas id="kmeansChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h3 class="text-lg font-bold text-slate-900">Activity Audit Trail</h3>
-                <p class="text-sm text-slate-500 mt-1">Secure system activity tracking</p>
-            </div>
-            <button class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">View All Logs &rarr;</button>
-        </div>
-        
-        <div class="overflow-x-auto rounded-xl border border-slate-100">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-widest font-semibold">
-                        <th class="px-6 py-4 border-b border-slate-100">Timestamp</th>
-                        <th class="px-6 py-4 border-b border-slate-100">Module</th>
-                        <th class="px-6 py-4 border-b border-slate-100">Action Detail</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    <?php foreach($recent_logs as $index => $log): 
-                        $isEven = $index % 2 === 0;
-                        $rowBg = $isEven ? 'bg-white' : 'bg-slate-50/50';
-                    ?>
-                    <tr class="<?= $rowBg ?> hover:bg-indigo-50/30 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap border-b border-slate-50 text-slate-600 font-medium">
-                            <?= date('M d, Y • H:i', strtotime($log['waktu'])) ?>
-                        </td>
-                        <td class="px-6 py-4 border-b border-slate-50">
-                            <?php 
-                                $badgeColor = $log['modul'] == 'Inbound' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200';
-                            ?>
-                            <span class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border <?= $badgeColor ?>">
-                                <?= $log['modul'] ?>
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 border-b border-slate-50 text-slate-700">
-                            <?= $log['aksi'] ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                    
-                    <?php if(empty($recent_logs)): ?>
-                    <tr>
-                        <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic bg-slate-50">
-                            No recent activity found in the secure audit log.
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const rawData = <?= $plot_data ?>;
-    
-    // Enterprise color palette for Chart.js
-    const datasets = {
-        'Fast Moving': { label: 'Fast Moving', data: [], backgroundColor: '#10b981', borderColor: '#059669', borderWidth: 1, pointRadius: 6, pointHoverRadius: 8 },
-        'Slow Moving': { label: 'Slow Moving', data: [], backgroundColor: '#fbbf24', borderColor: '#d97706', borderWidth: 1, pointRadius: 6, pointHoverRadius: 8 },
-        'Dead Stock': { label: 'Dead Stock', data: [], backgroundColor: '#f43f5e', borderColor: '#e11d48', borderWidth: 1, pointRadius: 6, pointHoverRadius: 8 }
-    };
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('spatialChart');
+        if (!ctx) return;
 
-    rawData.forEach(item => {
-        if (datasets[item.label_klaster]) {
-            datasets[item.label_klaster].data.push({ x: item.x, y: item.y, name: item.nama_barang });
-        }
-    });
+        const rawData = <?= $plot_data ?? '[]' ?>;
 
-    const ctx = document.getElementById('kmeansChart').getContext('2d');
-    
-    // Chart.js global font styling to match UI
-    Chart.defaults.font.family = "'Inter', 'Segoe UI', Roboto, sans-serif";
-    Chart.defaults.color = '#64748b';
-
-    new Chart(ctx, {
-        type: 'scatter',
-        data: { datasets: Object.values(datasets) },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: 20 },
-            scales: {
-                x: { 
-                    title: { display: true, text: 'Velocity Score (Total Outbound)', font: { weight: 'bold' } },
-                    grid: { color: '#f1f5f9', drawBorder: false }
-                },
-                y: { 
-                    title: { display: true, text: 'Actual Stock Level', font: { weight: 'bold' } },
-                    grid: { color: '#f1f5f9', drawBorder: false }
-                }
+        const datasets = {
+            'Fast Moving': {
+                label: 'Fast Moving',
+                data: [],
+                backgroundColor: '#10b981',
+                pointRadius: 6,
+                hoverRadius: 8,
+                borderColor: '#fff',
+                borderWidth: 1.5
             },
-            plugins: {
-                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: 'bold' } } },
-                tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 },
-                    padding: 12,
-                    cornerRadius: 8,
-                    displayColors: false,
-                    callbacks: {
-                        label: (ctx) => `${ctx.raw.name} — Velocity: ${ctx.raw.x} | Stock: ${ctx.raw.y}`
+            'Slow Moving': {
+                label: 'Slow Moving',
+                data: [],
+                backgroundColor: '#f59e0b',
+                pointRadius: 6,
+                hoverRadius: 8,
+                borderColor: '#fff',
+                borderWidth: 1.5
+            },
+            'Dead Stock': {
+                label: 'Dead Stock',
+                data: [],
+                backgroundColor: '#f43f5e',
+                pointRadius: 6,
+                hoverRadius: 8,
+                borderColor: '#fff',
+                borderWidth: 1.5
+            }
+        };
+
+        rawData.forEach(item => {
+            if (datasets[item.label_klaster]) {
+                datasets[item.label_klaster].data.push({
+                    x: parseFloat(item.x),
+                    y: parseFloat(item.y),
+                    nama: item.nama_barang
+                });
+            }
+        });
+
+        new Chart(ctx.getContext('2d'), {
+            type: 'scatter',
+            data: {
+                datasets: Object.values(datasets)
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                weight: 'bold',
+                                size: 10,
+                                family: 'Inter'
+                            },
+                            color: '#94a3b8'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: '#f8fafc',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                weight: 'bold',
+                                size: 10,
+                                family: 'Inter'
+                            },
+                            color: '#94a3b8'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: {
+                            size: 11,
+                            weight: 'black',
+                            family: 'Inter'
+                        },
+                        bodyFont: {
+                            size: 11,
+                            family: 'Inter',
+                            weight: '500'
+                        },
+                        displayColors: false,
+                        callbacks: {
+                            label: function(ctx) {
+                                return `Aset: ${ctx.raw.nama}\nRotasi: ${ctx.raw.x} | Stok: ${ctx.raw.y}`;
+                            }
+                        }
                     }
                 }
             }
-        }
+        });
     });
 </script>
+
 <?= $this->endSection() ?>

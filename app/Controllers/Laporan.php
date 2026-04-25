@@ -6,109 +6,180 @@ class Laporan extends BaseController
 {
     public function index()
     {
-        $db = \Config\Database::connect();
-        
-        $data['kmeans_chart'] = $db->table('tb_klaster_kmeans')
-                                   ->select('label_klaster, COUNT(*) as total')
-                                   ->groupBy('label_klaster')
-                                   ->get()->getResultArray();
+        // Pastikan hanya role manajerial yang bisa mengakses menu ini
+        $role = session()->get('role');
+        if (!in_array($role, ['Administrator', 'Kepala Balai', 'Kasubbag'])) {
+            return redirect()->to('/home')->with('error', 'Otoritas Ditolak. Anda tidak memiliki akses ke Pusat Laporan.');
+        }
 
-        $data['title'] = "Report Center | Executive Analytics";
-        return view('laporan/index', $data);
+        $db = \Config\Database::connect();
+        $data = [
+            'title' => 'Pusat Laporan | SILABAK',
+            // Data untuk Chart K-Means di halaman depan laporan
+            'kmeans_chart' => $db->table('tb_klaster_kmeans')
+                                 ->select('label_klaster, COUNT(*) as total')
+                                 ->groupBy('label_klaster')
+                                 ->get()->getResultArray()
+        ];
+
+        return view('Laporan/index', $data);
     }
 
-   
-    public function generate($tipe)
+    // --- 1. LAPORAN EKSEKUTIF (GABUNGAN) ---
+    public function eksekutif()
+    {
+        if (!in_array(session()->get('role'), ['Administrator', 'Kepala Balai', 'Kasubbag'])) {
+            return redirect()->back()->with('error', 'Akses Ditolak.');
+        }
+
+        $db = \Config\Database::connect();
+        
+        $bulan_ini = date('Y-m');
+        $valuasi = $db->table('tb_barang')->select('COUNT(id_barang) as total_sku, SUM(harga_beli * stok_aktual) as total_nilai')->get()->getRowArray();
+        
+        $data = [
+            'title'        => 'Laporan Eksekutif SILABAK',
+            'tanggal'      => date('d F Y'),
+            'valuasi'      => $valuasi,
+            'kmeans'       => $db->table('tb_klaster_kmeans')->select('label_klaster, COUNT(*) as total')->groupBy('label_klaster')->get()->getResultArray(),
+            'kritis'       => $db->table('tb_barang')->where('stok_aktual <= stok_minimum')->limit(10)->get()->getResultArray(),
+            'inbound'      => $db->table('tb_masuk')->where("DATE_FORMAT(tanggal_masuk, '%Y-%m')", $bulan_ini)->selectSum('qty_masuk')->get()->getRow()->qty_masuk ?? 0,
+            'outbound'     => $db->table('tb_keluar')->where("DATE_FORMAT(tanggal_keluar, '%Y-%m')", $bulan_ini)->selectSum('qty_keluar')->get()->getRow()->qty_keluar ?? 0
+        ];
+
+        $html = view('Laporan/pdf_eksekutif', $data);
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->setOptions(new \Dompdf\Options(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]));
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        return $dompdf->stream("Executive_Summary_" . date('Ymd') . ".pdf", ["Attachment" => false]);
+    }
+
+    // --- 2. FUNGSI CETAK UNIVERSAL (UNTUK 11 LAPORAN LAINNYA) ---
+    public function generate($type)
     {
         $db = \Config\Database::connect();
         
-        $mapJudul = [
-            'master_inventori' => '1. Laporan Master Inventori Global',
-            'barang_masuk'     => '2. Laporan Transaksi Barang Masuk',
-            'barang_keluar'    => '3. Laporan Distribusi Barang Keluar',
-            'stok_kritis'      => '4. Laporan Ambang Batas Keselamatan (Restock Alert)',
-            'fast_moving'      => '5. Laporan Kinerja Klaster: Fast Moving Items',
-            'slow_moving'      => '6. Laporan Kinerja Klaster: Slow Moving Items',
-            'dead_stock'       => '7. Laporan Indikasi Kerugian: Dead Stock Items',
-            'retur_audit'      => '8. Laporan Audit Pengembalian (Retur Barang)',
-            'kinerja_supplier' => '9. Laporan Jejak Rekam Kinerja Pemasok',
-            'valuasi_aset'     => '10. Laporan Nilai Valuasi Aset Gudang Terkini',
-            'system_log'       => '11. Laporan Jejak Audit Aktivitas Pengguna'
+        $data = [
+            'title' => '',
+            'columns' => [],
+            'data_list' => []
         ];
 
-        $data['judul_laporan'] = $mapJudul[$tipe] ?? 'Laporan Manajerial Logistik';
-        $data['tanggal_cetak'] = date('d F Y - H:i:s');
-        $data['pencetak']      = session()->get('nama_lengkap') ?? 'Administrator';
-        $data['role']          = session()->get('role') ?? 'Admin';
-
-        switch ($tipe) {
+        // Switch Case: Cek tombol laporan mana yang ditekan oleh user
+        switch ($type) {
+            
+            // --- KATEGORI OPERASIONAL ---
             case 'master_inventori':
-                $data['laporan'] = $db->table('tb_barang b')->select('b.kode_barang AS "Kode SKU", b.nama_barang AS "Identitas Produk", k.nama_kategori AS "Kategori", b.stok_aktual AS "Stok Tersedia"')->join('tb_kategori k', 'k.id_kategori = b.id_kategori', 'left')->get()->getResultArray();
-                break;
-            case 'barang_masuk':
-                $data['laporan'] = $db->table('tb_masuk m')->select('m.tanggal_masuk AS "Waktu Penerimaan", b.kode_barang AS "SKU", b.nama_barang AS "Nama Barang", s.nama_supplier AS "Pemasok", m.qty_masuk AS "Volume Masuk"')->join('tb_barang b', 'b.id_barang = m.id_barang')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->orderBy('m.tanggal_masuk', 'DESC')->get()->getResultArray();
-                break;
-            case 'barang_keluar':
-                $data['laporan'] = $db->table('tb_keluar k')->select('k.tanggal_keluar AS "Waktu Distribusi", b.kode_barang AS "SKU", b.nama_barang AS "Nama Barang", c.nama_customer AS "Tujuan/Customer", k.qty_keluar AS "Volume Keluar"')->join('tb_barang b', 'b.id_barang = k.id_barang')->join('tb_customer c', 'c.id_customer = k.id_customer')->orderBy('k.tanggal_keluar', 'DESC')->get()->getResultArray();
-                break;
-            case 'stok_kritis':
-                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "Kode SKU", nama_barang AS "Nama Barang", stok_minimum AS "Ambang Batas Kritis", stok_aktual AS "Sisa Stok Aktual"')->where('stok_aktual <= stok_minimum')->get()->getResultArray();
-                break;
-            case 'fast_moving':
-                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", k.velocity_score AS "Skor Velositas", b.stok_aktual AS "Stok Saat Ini"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Fast Moving')->orderBy('k.velocity_score', 'DESC')->get()->getResultArray();
-                break;
-            case 'slow_moving':
-                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", k.velocity_score AS "Skor Velositas", b.stok_aktual AS "Stok Menumpuk"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Slow Moving')->get()->getResultArray();
-                break;
-            case 'dead_stock':
-                $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", b.harga_beli AS "Harga Satuan (Rp)", b.stok_aktual AS "Stok Macet"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Dead Stock')->get()->getResultArray();
-                break;
-            case 'retur_audit':
-                $data['laporan'] = $db->table('tb_retur r')->select('r.tanggal_retur AS "Waktu Anomali", b.nama_barang AS "Produk Terkait", r.qty_retur AS "Volume", r.alasan AS "Keterangan", r.aksi_stok AS "Tindakan Sistem"')->join('tb_barang b', 'b.id_barang = r.id_barang')->orderBy('r.tanggal_retur', 'DESC')->get()->getResultArray();
-                break;
-            case 'kinerja_supplier':
-                // Perbaikan: Alias tidak menggunakan spasi pada orderBy
-                $data['laporan'] = $db->table('tb_masuk m')
-                                      ->select('s.nama_supplier AS "Identitas Pemasok", COUNT(m.id_masuk) AS "Frekuensi Transaksi", SUM(m.qty_masuk) AS total_volume_pasokan')
-                                      ->join('tb_supplier s', 's.id_supplier = m.id_supplier')
-                                      ->groupBy('m.id_supplier')
-                                      ->orderBy('total_volume_pasokan', 'DESC')
-                                      ->get()->getResultArray();
-                
-                // Kembalikan nama alias kolom ke bentuk string berspasi (opsional) agar tampilan pada view cetak_pdf sama
-                if(!empty($data['laporan'])) {
-                    foreach($data['laporan'] as &$row) {
-                        $row['Total Volume Pasokan'] = $row['total_volume_pasokan'];
-                        unset($row['total_volume_pasokan']);
-                    }
+                $data['title']   = 'Laporan Master Inventori Global';
+                $data['columns'] = ['Kode Aset', 'Nama Barang', 'Stok Aktual', 'Batas Min', 'Harga Satuan'];
+                $query = $db->table('tb_barang')->get()->getResultArray();
+                foreach($query as $row) {
+                    $data['data_list'][] = [
+                        $row['kode_barang'], 
+                        $row['nama_barang'], 
+                        $row['stok_aktual'] . ' Unit', 
+                        $row['stok_minimum'] . ' Unit', 
+                        'Rp ' . number_format($row['harga_beli'], 0, ',', '.')
+                    ];
                 }
                 break;
+
+            case 'barang_masuk':
+                $data['title']   = 'Log Penerimaan Logistik (Inbound)';
+                $data['columns'] = ['Waktu Masuk', 'Nama Barang', 'Kuantitas', 'Aktor Verifikasi'];
+                $query = $db->table('tb_masuk m')
+                            ->join('tb_barang b', 'b.id_barang = m.id_barang', 'left')
+                            ->join('tb_users u', 'u.id_user = m.id_user', 'left')
+                            ->orderBy('m.tanggal_masuk', 'DESC')->get()->getResultArray();
+                foreach($query as $row) {
+                    $data['data_list'][] = [date('d/m/Y H:i', strtotime($row['tanggal_masuk'])), $row['nama_barang'], $row['qty_masuk'].' Unit', $row['nama_lengkap'] ?? 'Sistem'];
+                }
+                break;
+
+            case 'barang_keluar':
+                $data['title']   = 'Log Distribusi Logistik (Outbound)';
+                $data['columns'] = ['Waktu Keluar', 'Nama Barang', 'Kuantitas', 'Aktor Verifikasi'];
+                $query = $db->table('tb_keluar k')
+                            ->join('tb_barang b', 'b.id_barang = k.id_barang', 'left')
+                            ->join('tb_users u', 'u.id_user = k.id_user', 'left')
+                            ->orderBy('k.tanggal_keluar', 'DESC')->get()->getResultArray();
+                foreach($query as $row) {
+                    $data['data_list'][] = [date('d/m/Y H:i', strtotime($row['tanggal_keluar'])), $row['nama_barang'], $row['qty_keluar'].' Unit', $row['nama_lengkap'] ?? 'Sistem'];
+                }
+                break;
+
+            // --- KATEGORI KECERDASAN BUATAN ---
+            case 'fast_moving':
+            case 'slow_moving':
+            case 'dead_stock':
+                $label = ucwords(str_replace('_', ' ', $type));
+                $data['title']   = 'Laporan Klaster AI - ' . $label;
+                $data['columns'] = ['Kode', 'Nama Barang', 'Stok Aktual', 'Velocity Score'];
+                $query = $db->table('tb_klaster_kmeans k')
+                            ->join('tb_barang b', 'b.id_barang = k.id_barang')
+                            ->where('k.label_klaster', $label)->get()->getResultArray();
+                foreach($query as $row) {
+                    $data['data_list'][] = [$row['kode_barang'], $row['nama_barang'], $row['stok_aktual'].' Unit', $row['velocity_score']];
+                }
+                break;
+
+            case 'stok_kritis':
+                $data['title']   = 'Daftar Ambang Stok Kritis';
+                $data['columns'] = ['Kode', 'Nama Barang', 'Sisa Stok', 'Batas Minimum', 'Kekurangan'];
+                $query = $db->table('tb_barang')->where('stok_aktual <= stok_minimum')->get()->getResultArray();
+                foreach($query as $row) {
+                    $kurang = $row['stok_minimum'] - $row['stok_aktual'];
+                    $data['data_list'][] = [$row['kode_barang'], $row['nama_barang'], $row['stok_aktual'].' Unit', $row['stok_minimum'].' Unit', "- $kurang Unit"];
+                }
+                break;
+
+            // --- KATEGORI AUDIT & SISTEM ---
             case 'valuasi_aset':
-                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "SKU", nama_barang AS "Nama Produk", stok_aktual AS "Volume Aset", harga_beli AS "Nilai Satuan", (stok_aktual * harga_beli) AS "Total Nilai Kapital"')->get()->getResultArray();
+                $data['title']   = 'Kalkulasi Valuasi Aset Fisik';
+                $data['columns'] = ['Nama Barang', 'Kuantitas', 'Harga Beli Satuan', 'Total Valuasi'];
+                $total_semua = 0;
+                $query = $db->table('tb_barang')->get()->getResultArray();
+                foreach($query as $row) {
+                    $subtotal = $row['stok_aktual'] * $row['harga_beli'];
+                    $total_semua += $subtotal;
+                    $data['data_list'][] = [
+                        $row['nama_barang'], 
+                        $row['stok_aktual'].' Unit', 
+                        'Rp '.number_format($row['harga_beli'],0,',','.'), 
+                        'Rp '.number_format($subtotal,0,',','.')
+                    ];
+                }
+                $data['total_summary'] = $total_semua; // Mengirimkan total untuk ditampilkan di bawah tabel PDF
                 break;
+
             case 'system_log':
-                $data['laporan'] = $db->table('tb_log_aktivitas l')->select('l.waktu AS "Timestamp", u.nama_lengkap AS "Operator/User", l.modul AS "Modul Sistem", l.aksi AS "Jejak Aktivitas"')->join('tb_users u', 'u.id_user = l.id_user')->orderBy('l.waktu', 'DESC')->get()->getResultArray();
+                $data['title']   = 'Security & System Audit Log';
+                $data['columns'] = ['Waktu', 'Modul', 'Aktivitas Terekam', 'Aktor (Otoritas)'];
+                $query = $db->table('tb_log_aktivitas l')
+                            ->join('tb_users u', 'u.id_user = l.id_user', 'left')
+                            ->orderBy('l.waktu', 'DESC')->limit(100)->get()->getResultArray();
+                foreach($query as $row) {
+                    $data['data_list'][] = [date('d/m/y H:i:s', strtotime($row['waktu'])), $row['modul'], $row['aksi'], $row['nama_lengkap'] ?? 'System/Deleted'];
+                }
                 break;
+
             default:
-                $data['laporan'] = [];
+                return redirect()->back()->with('error', 'Jenis laporan tidak dikenali sistem.');
         }
 
-        // ==========================================
-        // PROSES RENDER DOMPDF
-        // ==========================================
-        $html = view('laporan/cetak_pdf', $data);
+        // Render ke PDF menggunakan view cetak_pdf.php (Template Universal)
+        $html = view('Laporan/cetak_pdf', $data);
 
         $dompdf = new \Dompdf\Dompdf();
-        $options = $dompdf->getOptions();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-        $dompdf->setOptions($options);
-
+        $dompdf->setOptions(new \Dompdf\Options(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]));
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape'); 
+        $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-
-        $namaFile = "DOC_" . strtoupper($tipe) . "_" . date('Ymd_Hi') . ".pdf";
-        return $dompdf->stream($namaFile, ["Attachment" => false]); 
+        
+        // Gunakan false agar PDF langsung terbuka di Tab baru browser (Preview)
+        return $dompdf->stream("Laporan_{$type}_" . date('Ymd') . ".pdf", ["Attachment" => false]);
     }
 }

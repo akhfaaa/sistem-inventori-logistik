@@ -1,123 +1,151 @@
 <?= $this->extend('layout/main') ?>
 <?= $this->section('content') ?>
 
-<div class="max-w-[1400px] mx-auto px-4 py-8">
+<div class="max-w-[1400px] mx-auto px-6 py-8">
     
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-        <div>
-            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
-                SILABAK Spatial Intelligence
-            </h1>
-            <p class="text-slate-500 text-sm mt-1 font-medium">Pemetaan cerdas aset Bapekom VII menggunakan Algoritma K-Means.</p>
+    <div class="mb-10 bg-slate-900 rounded-[2rem] p-8 md:p-10 text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-8 border border-slate-800">
+        <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background-image: radial-gradient(#10b981 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black rounded-lg border border-emerald-500/20 mb-4 uppercase tracking-[0.2em]">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                Machine Learning Core
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Spatial Intelligence (AI)</h1>
+            <p class="text-slate-400 text-sm font-medium max-w-2xl leading-relaxed">
+                Modul ini menggunakan algoritma <b class="text-slate-200">K-Means Clustering</b> yang dioptimasi dengan parameter <b class="text-slate-200">RFM (Recency, Frequency, Monetary)</b> untuk memetakan kesehatan rotasi inventori secara presisi.
+            </p>
         </div>
-        <form action="<?= base_url('analitik/proses') ?>" method="POST">
-            <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl text-xs font-black hover:bg-indigo-700 transition-all flex items-center gap-3 shadow-xl shadow-indigo-100">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                UPDATE ANALISIS AI
-            </button>
-        </form>
+
+        <div class="relative z-10 shrink-0">
+            <form action="<?= base_url('analitik/kalkulasi') ?>" method="POST" onsubmit="return confirm('Sistem akan menganalisis ulang seluruh data histori barang. Proses ini mungkin memakan waktu beberapa detik. Lanjutkan?');">
+                <button type="submit" class="group relative px-8 py-4 bg-emerald-500 text-slate-900 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 flex items-center gap-3">
+                    <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Jalankan Engine AI
+                </button>
+            </form>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-
-    <?php 
-        $colors = [
-            'Fast Moving' => ['bg-emerald-50', 'text-emerald-800', 'border-emerald-100', 'icon' => '⚡'],
-            'Slow Moving' => ['bg-amber-50', 'text-amber-800', 'border-amber-100', 'icon' => '⏳'],
-            'Dead Stock'  => ['bg-rose-50', 'text-rose-800', 'border-rose-100', 'icon' => '🛑']
-        ];
-        foreach($rekap as $r): 
-            $c = $colors[$r['label_klaster']] ?? ['bg-slate-50', 'text-slate-800', 'border-slate-100', 'icon' => '📦'];
-        ?>
-        <div class="md:col-span-4 <?= $c[0] ?> p-8 rounded-[2rem] border <?= $c[2] ?> flex items-center justify-between group hover:scale-[1.02] transition-transform shadow-sm">
-            <div>
-                <span class="text-[10px] font-black opacity-50 uppercase tracking-widest block mb-1"><?= $r['label_klaster'] ?></span>
-                <p class="text-4xl font-black <?= $c[1] ?> tracking-tighter"><?= $r['total'] ?> <span class="text-xs font-bold opacity-50 ml-1 uppercase">SKU</span></p>
-            </div>
-            <div class="text-3xl filter grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 transition-all"><?= $c['icon'] ?></div>
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="mb-8 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg flex items-start gap-3 shadow-sm">
+            <svg class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="text-sm font-bold text-emerald-800"><?= session()->getFlashdata('success') ?></p>
         </div>
-        <?php endforeach; ?>
-        
-        <div class="md:col-span-8 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between group">
-            <div class="flex justify-between items-start mb-8">
-                <div>
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Peta Radar Stok</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Koordinat: Kecepatan Rotasi vs Volume Fisik</p>
-                </div>
-                <div class="flex gap-4">
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> <span class="text-[9px] font-black text-slate-400 uppercase">Fast</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> <span class="text-[9px] font-black text-slate-400 uppercase">Slow</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span> <span class="text-[9px] font-black text-slate-400 uppercase">Dead</span></div>
-                </div>
-            </div>
-            
-            <div class="h-[420px] w-full">
-                <canvas id="spatialChart"></canvas>
-            </div>
+    <?php endif; ?>
 
-            <div class="mt-6 flex justify-between text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">
-                <span>← Volume Rendah</span>
-                <span>Spatial Intelligence Mapping</span>
-                <span>Volume Tinggi →</span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Peta Spasial Distribusi RFM</h3>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">X: Velocity Score | Y: Stok Aktual</span>
             </div>
-        </div>
-
-        <div class="md:col-span-4 bg-slate-900 p-8 rounded-[2rem] text-white flex flex-col justify-between shadow-2xl">
-            <div>
-                <div class="inline-flex items-center px-2 py-1 bg-indigo-500/20 text-indigo-400 text-[9px] font-black rounded border border-indigo-500/30 mb-8 uppercase tracking-widest">
-                    AI Insights
-                </div>
-                <h3 class="text-xl font-black mb-6 leading-tight">Panduan <br/>Operasional Cerdas</h3>
-                
-                <div class="space-y-8">
-                    <div class="flex gap-4">
-                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-                        <div>
-                            <h4 class="text-[10px] font-black text-emerald-400 uppercase mb-1">Optimasi Pengadaan</h4>
-                            <p class="text-[11px] opacity-70 leading-relaxed">Fokus pada barang <span class="font-bold text-white">Fast Moving</span> yang berada di kuadran rendah untuk menghindari kehabisan stok.</p>
-                        </div>
+            <div class="flex-1 min-h-[300px] relative w-full">
+                <?php if(empty($klaster)): ?>
+                    <div class="absolute inset-0 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Engine AI belum dijalankan.</p>
                     </div>
-                    <div class="flex gap-4 border-t border-white/5 pt-6">
-                        <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                        <div>
-                            <h4 class="text-[10px] font-black text-rose-400 uppercase mb-1">Efisiensi Ruang</h4>
-                            <p class="text-[11px] opacity-70 leading-relaxed">Barang <span class="font-bold text-white">Dead Stock</span> di kuadran tinggi membebani kapasitas rak. Disarankan pengurangan aset.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-10 pt-6 border-t border-white/5 flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-[9px] font-bold opacity-40 uppercase tracking-widest text-slate-100">Status: Algoritma Aktif</span>
+                <?php else: ?>
+                    <canvas id="spatialChart"></canvas>
+                <?php endif; ?>
             </div>
         </div>
 
-        
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div>
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Distribusi Klaster</h3>
+                <div class="space-y-4">
+                    <?php 
+                    $colors = [
+                        'Fast Moving' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-100'],
+                        'Slow Moving' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'border' => 'border-amber-100'],
+                        'Dead Stock'  => ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'border' => 'border-rose-100']
+                    ];
+                    if(empty($rekap)): ?>
+                        <p class="text-[10px] text-slate-400 text-center font-bold italic py-4">Data kosong.</p>
+                    <?php else: foreach($rekap as $r): 
+                        $c = $colors[$r['label_klaster']] ?? ['bg' => 'bg-slate-50', 'text' => 'text-slate-700', 'border' => 'border-slate-100'];
+                    ?>
+                    <div class="flex items-center justify-between p-4 rounded-xl border <?= $c['bg'] ?> <?= $c['border'] ?>">
+                        <span class="text-[11px] font-bold uppercase tracking-widest <?= $c['text'] ?>"><?= $r['label_klaster'] ?></span>
+                        <span class="text-2xl font-black <?= $c['text'] ?>"><?= $r['total'] ?></span>
+                    </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">Detail Klasifikasi Master Aset</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-100">
+                        <th class="px-6 py-5">Identitas Aset</th>
+                        <th class="px-6 py-5 text-center">Volume Aktual</th>
+                        <th class="px-6 py-5 text-center">Velocity Score (AI)</th>
+                        <th class="px-6 py-5 text-right">Hasil Klaster</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <?php if(empty($klaster)): ?>
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-sm font-bold text-slate-400">Belum ada data. Silakan jalankan Engine AI.</td></tr>
+                    <?php else: foreach($klaster as $k): ?>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-bold text-slate-900 block"><?= $k['nama_barang'] ?></span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">ID: <?= $k['kode_barang'] ?></span>
+                            </td>
+                            <td class="px-6 py-4 text-center font-bold text-slate-700"><?= $k['stok_aktual'] ?> Unit</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-black border border-slate-200"><?= $k['velocity_score'] ?></span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <?php 
+                                    $badge = 'bg-slate-100 text-slate-500';
+                                    if($k['label_klaster'] == 'Fast Moving') $badge = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                                    if($k['label_klaster'] == 'Slow Moving') $badge = 'bg-amber-100 text-amber-700 border-amber-200';
+                                    if($k['label_klaster'] == 'Dead Stock') $badge = 'bg-rose-100 text-rose-700 border-rose-200';
+                                ?>
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border <?= $badge ?>">
+                                    <?= $k['label_klaster'] ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const ctx = document.getElementById('spatialChart').getContext('2d');
-    const rawData = <?= json_encode($chart_spasial) ?>;
+    const ctxElem = document.getElementById('spatialChart');
+    if(!ctxElem) return;
+
+    // Menangkap data dari Controller
+    const rawData = <?= json_encode($chart_spasial ?? []) ?>;
     
     const datasets = {
-        'Fast Moving': { label: 'Fast Moving', data: [], backgroundColor: '#10b981', pointRadius: 10, hoverRadius: 15, borderColor: '#fff', borderWidth: 3 },
-        'Slow Moving': { label: 'Slow Moving', data: [], backgroundColor: '#f59e0b', pointRadius: 10, hoverRadius: 15, borderColor: '#fff', borderWidth: 3 },
-        'Dead Stock': { label: 'Dead Stock', data: [], backgroundColor: '#f43f5e', pointRadius: 10, hoverRadius: 15, borderColor: '#fff', borderWidth: 3 }
+        'Fast Moving': { label: 'Fast Moving', data: [], backgroundColor: '#10b981', pointRadius: 6, hoverRadius: 8, borderColor: '#fff', borderWidth: 2 },
+        'Slow Moving': { label: 'Slow Moving', data: [], backgroundColor: '#f59e0b', pointRadius: 6, hoverRadius: 8, borderColor: '#fff', borderWidth: 2 },
+        'Dead Stock':  { label: 'Dead Stock', data: [], backgroundColor: '#f43f5e', pointRadius: 6, hoverRadius: 8, borderColor: '#fff', borderWidth: 2 }
     };
 
+    // Memasukkan data ke dalam klaster masing-masing
     rawData.forEach(item => {
         if(datasets[item.label_klaster]) {
             datasets[item.label_klaster].data.push({ x: parseFloat(item.x), y: parseFloat(item.y), nama: item.nama_barang });
         }
     });
 
-    new Chart(ctx, {
+    new Chart(ctxElem.getContext('2d'), {
         type: 'scatter',
         data: { datasets: Object.values(datasets) },
         options: {
@@ -125,26 +153,24 @@ document.addEventListener("DOMContentLoaded", function() {
             maintainAspectRatio: false,
             scales: {
                 x: { 
-                    grid: { display: false }, 
-                    ticks: { font: { weight: '900', size: 9 }, color: '#94a3b8' },
-                    title: { display: true, text: 'VELOCITY (X)', font: { weight: 'bold', size: 8 }, color: '#cbd5e1' }
+                    title: { display: true, text: 'Velocity Score (Kombinasi RFM)', font: { size: 10, weight: 'bold' } },
+                    grid: { display: false } 
                 },
                 y: { 
-                    grid: { color: '#f8fafc' }, 
-                    ticks: { font: { weight: '900', size: 9 }, color: '#94a3b8' },
-                    title: { display: true, text: 'STOCK (Y)', font: { weight: 'bold', size: 8 }, color: '#cbd5e1' }
+                    title: { display: true, text: 'Stok Aktual (Unit)', font: { size: 10, weight: 'bold' } },
+                    grid: { color: '#f8fafc' } 
                 }
             },
             plugins: {
-                legend: { display: false },
+                legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: 'bold' } } },
                 tooltip: {
-                    backgroundColor: '#0f172a',
-                    padding: 16,
-                    cornerRadius: 12,
-                    titleFont: { size: 12, weight: '900' },
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    padding: 12,
+                    cornerRadius: 8,
+                    titleFont: { size: 12, weight: 'bold' },
                     bodyFont: { size: 11 },
                     callbacks: {
-                        label: function(ctx) { return ` SKU: ${ctx.raw.nama} (Rotasi: ${ctx.raw.x}%, Stok: ${ctx.raw.y})`; }
+                        label: function(ctx) { return `Aset: ${ctx.raw.nama} | Score: ${ctx.raw.x} | Stok: ${ctx.raw.y}`; }
                     }
                 }
             }

@@ -1,107 +1,87 @@
 <?= $this->extend('layout/main') ?>
 <?= $this->section('content') ?>
 
-<div class="max-w-[1400px] mx-auto px-4 py-8">
-    
+<div class="max-w-[1400px] mx-auto px-6 py-8">
     <div class="mb-10">
-        <div class="inline-flex items-center px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-full border border-emerald-100 mb-3 uppercase tracking-widest">
-            Akses Operasional: Staff Gudang
-        </div>
-        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Warehouse Operations</h1>
-        <p class="text-slate-500 text-sm mt-2 font-medium">Pusat kendali mutasi harian dan pencatatan fisik logistik Bapekom VII.</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Warehouse Operations</h1>
+        <p class="text-slate-500 text-sm mt-1.5 font-medium">Pilih tindakan operasional untuk memulai pencatatan logistik.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-        
-        <div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <a href="<?= base_url('inbound') ?>" class="group bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden">
-                <div class="relative z-10">
-                    <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                    </div>
-                    <h3 class="text-3xl font-black tracking-tight mb-2">Barang<br/>Masuk</h3>
-                    <p class="text-xs font-medium text-indigo-100 opacity-80">Catat penerimaan stok baru dari vendor atau pengadaan.</p>
-                </div>
-                <div class="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                    <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                </div>
-            </a>
-
-            <a href="<?= base_url('outbound') ?>" class="group bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden">
-                <div class="relative z-10">
-                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-8">
-                        <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                    </div>
-                    <h3 class="text-3xl font-black tracking-tight mb-2">Barang<br/>Keluar</h3>
-                    <p class="text-xs font-medium text-slate-400">Catat distribusi logistik untuk keperluan internal balai.</p>
-                </div>
-            </a>
-        </div>
-
-        <div class="md:col-span-4 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <a href="<?= base_url('inbound') ?>" class="group bg-white p-8 rounded-[2rem] border-2 border-emerald-100 shadow-[0_8px_30px_rgb(16,185,129,0.05)] hover:border-emerald-400 hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300 flex items-center gap-6 cursor-pointer">
+            <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
             <div>
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Aktivitas Hari Ini (<?= date('d M Y') ?>)</h3>
-                
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                            <span class="text-xs font-black text-slate-700 uppercase tracking-widest">Inbound</span>
-                        </div>
-                        <span class="text-2xl font-black text-indigo-700"><?= $transaksi_masuk_hari_ini ?></span>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight mb-1">Barang Masuk</h3>
+                <p class="text-xs font-medium text-slate-500">Scan QR / Catat penerimaan aset baru.</p>
+            </div>
+        </a>
+
+        <a href="<?= base_url('outbound') ?>" class="group bg-white p-8 rounded-[2rem] border-2 border-blue-100 shadow-[0_8px_30px_rgb(59,130,246,0.05)] hover:border-blue-400 hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300 flex items-center gap-6 cursor-pointer">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight mb-1">Barang Keluar</h3>
+                <p class="text-xs font-medium text-slate-500">Keluarkan aset untuk distribusi unit.</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute inset-0 opacity-[0.03] z-0" style="background-image: radial-gradient(#f59e0b 2px, transparent 2px); background-size: 20px 20px;"></div>
+            
+            <div class="relative z-10 mb-8">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Aktivitas Hari Ini</h3>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg></div>
+                    <div>
+                        <p class="text-3xl font-black leading-none"><?= $transaksi_masuk_hari_ini ?></p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-widest mt-1">Trx Masuk</p>
                     </div>
-                    
-                    <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            <span class="text-xs font-black text-slate-700 uppercase tracking-widest">Outbound</span>
-                        </div>
-                        <span class="text-2xl font-black text-emerald-700"><?= $transaksi_keluar_hari_ini ?></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg></div>
+                    <div>
+                        <p class="text-3xl font-black leading-none"><?= $transaksi_keluar_hari_ini ?></p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-widest mt-1">Trx Keluar</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-6 pt-6 border-t border-slate-100">
-                <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <span>Total SKU Tersimpan:</span>
-                    <span class="text-slate-800 text-sm"><?= $total_barang ?> Jenis</span>
-                </div>
+            <div class="relative z-10 pt-6 border-t border-slate-800">
+                <p class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-1">Total Katalog</p>
+                <p class="text-xl font-black"><?= $total_barang ?> <span class="text-[10px] text-slate-400 font-normal">SKU</span></p>
             </div>
         </div>
 
-        <div class="md:col-span-12 bg-white p-8 rounded-[2.5rem] border border-rose-100 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                    <span class="w-2 h-6 bg-rose-500 rounded-full"></span>
-                    Perhatian: Stok Fisik Menipis
-                </h3>
-            </div>
+        <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
+            <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Daftar Cek Fisik (Stok Menipis)</h3>
             
-            <?php if(empty($stok_menipis)): ?>
-                <div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Seluruh stok fisik saat ini dalam batas aman.</p>
-                </div>
-            <?php else: ?>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <?php foreach($stok_menipis as $sm): ?>
-                    <div class="p-5 bg-rose-50/50 rounded-2xl border border-rose-100 hover:bg-rose-50 transition-colors">
-                        <p class="text-xs font-black text-slate-800 uppercase mb-2 line-clamp-1" title="<?= $sm['nama_barang'] ?>"><?= $sm['nama_barang'] ?></p>
-                        <div class="flex justify-between items-end">
+            <div class="flex-1 space-y-3">
+                <?php if(empty($stok_menipis)): ?>
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 p-8 border-2 border-dashed border-slate-100 rounded-2xl">
+                        <svg class="w-8 h-8 mb-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-[11px] font-bold uppercase tracking-widest">Semua stok mencukupi</p>
+                    </div>
+                <?php else: foreach($stok_menipis as $sm): ?>
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-white hover:shadow-md hover:border-amber-200 border border-transparent transition-all cursor-default">
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-black">!</div>
                             <div>
-                                <span class="text-[9px] font-bold text-slate-500 uppercase block mb-0.5">Sisa Fisik</span>
-                                <span class="text-xl font-black text-rose-600"><?= $sm['stok_aktual'] ?></span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[9px] font-bold text-slate-500 uppercase block mb-0.5">Batas Min</span>
-                                <span class="text-sm font-black text-slate-700"><?= $sm['stok_minimum'] ?></span>
+                                <p class="text-sm font-bold text-slate-900"><?= $sm['nama_barang'] ?></p>
+                                <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">ID: <?= $sm['kode_barang'] ?></p>
                             </div>
                         </div>
+                        <div class="text-right">
+                            <p class="text-lg font-black text-rose-600 leading-none"><?= $sm['stok_aktual'] ?></p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Min: <?= $sm['stok_minimum'] ?></p>
+                        </div>
                     </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                <?php endforeach; endif; ?>
+            </div>
         </div>
-
     </div>
 </div>
 

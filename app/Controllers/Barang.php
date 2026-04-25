@@ -2,26 +2,19 @@
 
 namespace App\Controllers;
 
-use App\Models\BarangModel;
-
 class Barang extends BaseController
 {
     public function index()
     {
         $db = \Config\Database::connect();
 
-        // Inilah inti dari Langkah 3: Melakukan JOIN agar data lengkap
         $data = [
             'title'    => 'Master Inventory | SKU Management',
-
-            // Kita berikan alias 'b' untuk tb_barang agar query lebih pendek
             'barang'   => $db->table('tb_barang b')
                 ->select('b.*, k.nama_kategori, r.nama_rak, r.lokasi')
                 ->join('tb_kategori k', 'k.id_kategori = b.id_kategori', 'left')
-                ->join('tb_rak r', 'r.id_rak = b.id_rak', 'left') // Inilah kolom yang tadi error
+                ->join('tb_rak r', 'r.id_rak = b.id_rak', 'left')
                 ->get()->getResultArray(),
-
-            // Data ini dikirim agar Dropdown di Modal Tambah Barang bisa muncul
             'kategori' => $db->table('tb_kategori')->get()->getResultArray(),
             'rak'      => $db->table('tb_rak')->get()->getResultArray()
         ];
@@ -32,19 +25,45 @@ class Barang extends BaseController
     public function store()
     {
         $db = \Config\Database::connect();
+        $id_rak = $this->request->getPost('id_rak');
 
         $dataInsert = [
-            'kode_barang'        => $this->request->getPost('kode_barang'),
-            'nama_barang'        => $this->request->getPost('nama_barang'),
-            'id_kategori'        => $this->request->getPost('id_kategori'),
-            'id_rak'             => $this->request->getPost('id_rak'), // Pastikan baris ini ada
-            'stok_aktual'        => $this->request->getPost('stok_aktual'),
-            'batas_stok_kritis'  => $this->request->getPost('batas_stok_kritis'),
-            'harga_beli'         => $this->request->getPost('harga_beli'),
+            'kode_barang'   => $this->request->getPost('kode_barang'),
+            'nama_barang'   => $this->request->getPost('nama_barang'),
+            'id_kategori'   => $this->request->getPost('id_kategori'),
+            'id_rak'        => empty($id_rak) ? null : $id_rak,
+            'stok_aktual'   => $this->request->getPost('stok_aktual'),
+            'stok_minimum'  => $this->request->getPost('stok_minimum'), // <-- Sudah diperbaiki
+            'harga_beli'    => $this->request->getPost('harga_beli'),
         ];
 
         $db->table('tb_barang')->insert($dataInsert);
+        return redirect()->to('/barang')->with('success', 'Aset baru berhasil diregistrasi.');
+    }
 
-        return redirect()->to('/barang')->with('success', 'SKU baru berhasil terdaftar dan ditempatkan di rak.');
+    public function update($id_barang)
+    {
+        $db = \Config\Database::connect();
+        $id_rak = $this->request->getPost('id_rak');
+
+        $dataUpdate = [
+            'kode_barang'   => $this->request->getPost('kode_barang'),
+            'nama_barang'   => $this->request->getPost('nama_barang'),
+            'id_kategori'   => $this->request->getPost('id_kategori'),
+            'id_rak'        => empty($id_rak) ? null : $id_rak,
+            'stok_aktual'   => $this->request->getPost('stok_aktual'),
+            'stok_minimum'  => $this->request->getPost('stok_minimum'), // <-- Sudah diperbaiki
+            'harga_beli'    => $this->request->getPost('harga_beli'),
+        ];
+
+        $db->table('tb_barang')->where('id_barang', $id_barang)->update($dataUpdate);
+        return redirect()->to('/barang')->with('success', 'Data aset berhasil diperbarui.');
+    }
+
+    public function delete($id_barang)
+    {
+        $db = \Config\Database::connect();
+        $db->table('tb_barang')->where('id_barang', $id_barang)->delete();
+        return redirect()->to('/barang')->with('success', 'Data aset berhasil dihapus dari sistem.');
     }
 }

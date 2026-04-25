@@ -26,13 +26,15 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('/supplierevaluasi/delete/(:num)', 'SupplierEvaluasi::delete/$1');
 
     // Dashboard & PDF
+    // --- Rute Dashboard & Home ---
+    $routes->get('/home', 'Home::index');
     $routes->get('/home/main', 'Home::main');
     $routes->get('/home/exportPDF', 'Home::exportPDF');
 
-    // Master Barang
+    // --- Rute Master Barang ---
     $routes->get('/barang', 'Barang::index');
     $routes->post('/barang/store', 'Barang::store');
-    $routes->post('/barang/update', 'Barang::update');
+    $routes->post('/barang/update/(:num)', 'Barang::update/$1');
     $routes->get('/barang/delete/(:num)', 'Barang::delete/$1');
 
     $routes->get('/retur', 'Retur::index');
@@ -55,11 +57,20 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     // Laporan & Analytics
     $routes->get('/laporan', 'Laporan::index');
     $routes->get('/laporan/generate/(:segment)', 'Laporan::generate/$1');
+    // --- Rute Laporan Eksekutif ---
+    $routes->get('/laporan/eksekutif', 'Laporan::eksekutif');
+    // --- Rute Cetak Universal ---
+    $routes->get('/laporan/generate/(:any)', 'Laporan::generate/$1');
     // --- Rute untuk Modul Analitik K-Means ---
     $routes->get('analitik', 'Analitik::index');
     $routes->post('analitik/proses', 'Analitik::proses');
+    // --- Modul Spatial Intelligence (AI) ---
+    $routes->get('/analitik', 'Analitik::index');
+    $routes->post('/analitik/kalkulasi', 'Analitik::kalkulasi_kmeans');
 
+    // --- Rute Manajemen Akses (Users) ---
     $routes->get('/users', 'Users::index');
     $routes->post('/users/store', 'Users::store');
+    $routes->post('/users/update/(:num)', 'Users::update/$1'); // <-- Tambahkan baris ini
     $routes->get('/users/delete/(:num)', 'Users::delete/$1');
 });

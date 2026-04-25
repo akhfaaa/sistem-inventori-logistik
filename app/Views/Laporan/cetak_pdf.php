@@ -2,117 +2,104 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title><?= $judul_laporan ?></title>
+    <title><?= $title ?></title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11px; color: #1e293b; }
-        
-        /* Kop Surat Bapekom PUPR */
-        .kop-surat { width: 100%; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 25px; text-align: center; }
-        .kop-surat h1 { font-size: 16px; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; }
-        .kop-surat p { font-size: 10px; margin: 0; color: #475569; }
-        
-        /* Header Laporan */
-        .judul-dokumen { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; text-decoration: underline; }
-        .info-meta { text-align: center; font-size: 10px; color: #64748b; margin-bottom: 25px; }
+        @page { margin: 1.5cm; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.4; font-size: 11px; margin: 0; }
 
-        /* Tabel Otomatis */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { border: 1px solid #cbd5e1; padding: 8px 10px; }
-        th { background-color: #f8fafc; text-align: left; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 9px; }
+        /* KOP SURAT MODERN (Tanpa Gambar, Fokus Tipografi) */
+        .kop-surat { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; }
+        .kop-surat h1 { margin: 0; font-size: 18px; text-transform: uppercase; color: #0f172a; font-weight: 900; letter-spacing: 0.5px; }
+        .kop-surat h2 { margin: 4px 0; font-size: 13px; text-transform: uppercase; color: #334155; }
+        .kop-surat p { margin: 5px 0 0; font-size: 10px; color: #64748b; }
+
+        /* JUDUL LAPORAN */
+        .report-title { text-align: center; margin-bottom: 20px; }
+        .report-title h3 { margin: 0; font-size: 16px; text-decoration: underline; color: #000; text-transform: uppercase; }
+        .report-title p { margin: 6px 0; font-size: 10px; font-weight: bold; color: #475569; letter-spacing: 1px; }
+
+        /* TABEL DATA */
+        table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        table.data-table th { background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; color: #0f172a; }
+        table.data-table td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; }
         
-        /* Pewarnaan Khusus Angka */
-        td.angka { text-align: right; font-weight: bold; }
-        
-        /* Kolom Tanda Tangan */
-        .ttd-box { width: 100%; margin-top: 30px; page-break-inside: avoid; }
-        .ttd-box table { border: none; }
-        .ttd-box td { border: none; text-align: center; width: 33%; vertical-align: top; }
-        .ttd-nama { font-weight: bold; text-decoration: underline; margin-top: 60px; display: block; }
+        table.data-table tr:nth-child(even) { background-color: #fcfcfc; }
+
+        /* UTILITAS */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+
+        /* TANDA TANGAN */
+        .footer-sign { margin-top: 40px; width: 100%; border: none; }
+        .footer-sign td { border: none; padding: 0; }
+        .sign-box { width: 250px; text-align: center; }
+        .spacer { height: 70px; }
     </style>
 </head>
 <body>
 
-    <table class="kop-surat" style="border-bottom: 4px double #000; margin-bottom: 25px; width: 100%; border-collapse: collapse;">
+    <div class="kop-surat">
+        <h1>Kementerian Pekerjaan Umum</h1>
+        <h2>Bapekom PU Wilayah VII Banjarmasin</h2>
+        <p>Jl. Tatah Belayung Baru, Kertak Hanyar, Kab. Banjar, Kalimantan Selatan</p>
+    </div>
+
+    <div class="report-title">
+        <h3><?= $title ?></h3>
+        <p>ID DOKUMEN: SILABAK-<?= date('Ymd') ?>-<?= strtoupper(substr(md5(time()), 0, 5)) ?></p>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th width="30" class="text-center">No</th>
+                <?php if(isset($columns)): foreach($columns as $col): ?>
+                    <th><?= $col ?></th>
+                <?php endforeach; endif; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if(empty($data_list)): ?>
+                <tr>
+                    <td colspan="<?= isset($columns) ? count($columns) + 1 : 5 ?>" class="text-center">Data tidak ditemukan untuk periode ini.</td>
+                </tr>
+            <?php else: $no = 1; foreach($data_list as $row): ?>
+                <tr>
+                    <td class="text-center"><?= $no++ ?></td>
+                    <?php foreach($row as $value): ?>
+                        <td><?= $value ?></td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; endif; ?>
+        </tbody>
+    </table>
+
+    <?php if(isset($total_summary)): ?>
+    <div class="text-right" style="margin-top: -10px; margin-bottom: 20px;">
+        <div style="display: inline-block; border: 2px solid #0f172a; padding: 10px; background: #f8fafc;">
+            <span style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;">Total Akumulasi:</span><br>
+            <span style="font-size: 16px; font-weight: 900; color: #0f172a;">Rp <?= number_format($total_summary, 0, ',', '.') ?></span>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <table class="footer-sign">
         <tr>
-            <td style="width: 15%; text-align: center; vertical-align: middle; border: none; padding-bottom: 10px;">
-                <?php
-                    // Trik Dompdf: Menggunakan path absolut lokal & mengubahnya ke Base64 agar pasti ter-render
-                    $logoPath = FCPATH . 'assets/img/logo_pupr.png';
-                    if(file_exists($logoPath)) {
-                        $logoData = base64_encode(file_get_contents($logoPath));
-                        $logoSrc = 'data:image/png;base64,' . $logoData;
-                    } else {
-                        // Jika file lokal belum ada, pakai fallback dari internet
-                        $logoSrc = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Logo_PUPR.png/320px-Logo_PUPR.png';
-                    }
-                ?>
-                <img src="<?= $logoSrc ?>" alt="Logo PUPR" style="width: 80px; height: auto;">
+            <td></td>
+            <td class="sign-box">
+                <p>Banjarmasin, <?= date('d F Y') ?></p>
+                <p class="font-bold">Mengetahui/Menyetujui,</p>
+                <p style="margin-top: -10px;">Kasubbag Umum dan Tata Usaha</p>
+                <div class="spacer"></div>
+                <p class="font-bold"><u>__________________________</u></p>
+                <p>NIP. ........................................</p>
             </td>
-            
-            <td style="width: 70%; text-align: center; vertical-align: middle; border: none; padding-bottom: 10px;">
-                <h2 style="font-size: 16px; margin: 0; color: #000; font-weight: normal; letter-spacing: 1px;">KEMENTERIAN PEKERJAAN UMUM</h2>
-                <h1 style="font-size: 18px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; color: #000; font-weight: 900;">
-                    BALAI PENGEMBANGAN KOMPETENSI PU WILAYAH VII BANJARMASIN
-                </h1>
-                <p style="font-size: 11px; margin: 0; color: #333;">
-                    Jl. Beruntung Jaya No.9, Pemurus Dalam, Kec. Banjarmasin Sel., Kota Banjarmasin, Kalimantan Selatan<br>
-                    <strong>Sistem Informasi Logistik dan Analitik Barang K-Means (SILABAK)</strong>
-                </p>
-            </td>
-            
-            <td style="width: 15%; border: none;"></td>
         </tr>
     </table>
 
-    <div class="judul-dokumen"><?= $judul_laporan ?></div>
-    <div class="info-meta">Dicetak pada: <?= $tanggal_cetak ?> WITA</div>
-
-    <?php if(!empty($laporan)): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 5%; text-align:center;">NO</th>
-                    <?php foreach(array_keys($laporan[0]) as $header): ?>
-                        <th><?= $header ?></th>
-                    <?php endforeach; ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php $no = 1; foreach($laporan as $baris): ?>
-                    <tr>
-                        <td style="text-align:center;"><?= $no++ ?></td>
-                        <?php foreach($baris as $nilai): ?>
-                            <?php 
-                                // Deteksi jika nilainya berupa angka besar (seperti Harga), otomatis format Rupiah
-                                $isAngkaBesar = is_numeric($nilai) && $nilai > 1000;
-                            ?>
-                            <td class="<?= is_numeric($nilai) ? 'angka' : '' ?>">
-                                <?= $isAngkaBesar ? 'Rp ' . number_format($nilai, 0, ',', '.') : $nilai ?>
-                            </td>
-                        <?php endforeach; ?>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p style="text-align: center; color: #ef4444; padding: 20px; border: 1px dashed #fca5a5;">
-            Belum ada data transaksi atau rekaman untuk kategori laporan ini.
-        </p>
-    <?php endif; ?>
-
-    <div class="ttd-box">
-        <table>
-            <tr>
-                <td></td>
-                <td></td>
-                <td>
-                    Banjarmasin, <?= date('d F Y') ?><br>
-                    Mengetahui,<br>
-                    <b>Kepala Sub Bagian Umum dan Tata Usaha</b>
-                    <span class="ttd-nama"><?= strtoupper($pencetak) ?></span>
-                </td>
-            </tr>
-        </table>
+    <div style="position: fixed; bottom: -30px; left: 0; right: 0; font-size: 9px; color: #94a3b8; text-align: center;">
+        Dicetak secara otomatis melalui Sistem Informasi Logistik dan Analitik Barang (SILABAK) - <?= date('d/m/Y H:i') ?> WITA
     </div>
 
 </body>

@@ -27,7 +27,7 @@ class Inbound extends BaseController
         // 3. Hitung Rekomendasi SPK SAW
         $spkModel = new SpkModel();
         $rekomendasi = $spkModel->hitungSAW();
-        
+
         // Ambil peringkat pertama (skor tertinggi) sebagai rekomendasi utama
         $data['best_supplier'] = !empty($rekomendasi) ? $rekomendasi[0] : null;
 
@@ -38,32 +38,52 @@ class Inbound extends BaseController
     public function store()
     {
         $db = \Config\Database::connect();
-        $barangModel = new BarangModel();
 
         $id_barang   = $this->request->getPost('id_barang');
         $id_supplier = $this->request->getPost('id_supplier');
         $qty_masuk   = $this->request->getPost('qty_masuk');
 
-        // 1. Ambil data barang untuk mendapatkan nama (keperluan log)
+        // 1. Validasi Sisi Server
+        if (empty($id_barang) || empty($id_supplier) || $qty_masuk < 1) {
+            return redirect()->back()->with('error', 'Validasi Gagal: Formulir tidak lengkap atau kuantitas masuk tidak logis!');
+        }
+
         $barang = $db->table('tb_barang')->where('id_barang', $id_barang)->get()->getRowArray();
 
-        // 2. Simpan Transaksi Masuk
+        // 2. Mulai Transaksi Database
+        $db->transStart();
+
+        // A. Catat histori penerimaan
         $db->table('tb_masuk')->insert([
             'id_barang'     => $id_barang,
             'id_supplier'   => $id_supplier,
             'qty_masuk'     => $qty_masuk,
-            'tanggal_masuk' => date('Y-m-d H:i:s')
+            'tanggal_masuk' => date('Y-m-d H:i:s'),
+            'id_user'       => session()->get('id_user')
         ]);
 
-        // 3. Update Stok di Tabel Barang (Increment)
+        // B. Tambahkan stok aktual ke tabel master barang
         $db->table('tb_barang')
-           ->where('id_barang', $id_barang)
-           ->set('stok_aktual', "stok_aktual + $qty_masuk", false)
-           ->update();
+            ->where('id_barang', $id_barang)
+            ->set('stok_aktual', 'stok_aktual + ' . $qty_masuk, false)
+            ->update();
 
-        // 4. Catat ke Audit Log
-        $this->tulis_log("Input barang masuk: {$barang['nama_barang']} (+{$qty_masuk})", "Inbound");
+        // C. Catat Log Audit Sistem
+        $db->table('tb_log_aktivitas')->insert([
+            'id_user' => session()->get('id_user'),
+            'aksi'    => 'Penerimaan logistik: ' . ($barang['nama_barang'] ?? 'Aset ID ' . $id_barang) . ' (' . $qty_masuk . ' unit)',
+            'modul'   => 'Inbound Logistik',
+            'waktu'   => date('Y-m-d H:i:s')
+        ]);
 
-        return redirect()->to('/inbound')->with('success', 'Stok berhasil ditambahkan ke gudang.');
+        // Selesaikan Transaksi
+        $db->transComplete();
+
+        // Validasi kegagalan Query
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem (Database Error). Registrasi stok dibatalkan otomatis.');
+        }
+
+        return redirect()->to('/inbound')->with('success', 'Penerimaan barang berhasil diregistrasi dan stok telah ditambahkan ke gudang.');
     }
 }
