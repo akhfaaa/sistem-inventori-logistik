@@ -7,7 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // 1. Rute Publik (Tidak butuh login)
-$routes->get('/', 'Auth::index'); 
+$routes->get('/', 'Auth::index');
 $routes->get('/auth', 'Auth::index');
 
 $routes->get('/login', 'Auth::index');
@@ -55,6 +55,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     // Laporan & Analytics
     $routes->get('/laporan', 'Laporan::index');
     $routes->get('/laporan/generate/(:segment)', 'Laporan::generate/$1');
+    // --- Rute untuk Modul Analitik K-Means ---
+    $routes->get('analitik', 'Analitik::index');
+    $routes->post('analitik/proses', 'Analitik::proses');
 
     $routes->get('/users', 'Users::index');
     $routes->post('/users/store', 'Users::store');

@@ -10,16 +10,28 @@ class Analitik extends BaseController
     public function index()
     {
         $db = \Config\Database::connect();
+        
         $data = [
             'title' => 'Analitik K-Means | Inventori',
+            
+            // 1. Data untuk Tabel Bawah
             'list_barang' => $db->table('tb_klaster_kmeans k')
                                ->select('k.*, b.nama_barang')
                                ->join('tb_barang b', 'b.id_barang = k.id_barang')
                                ->get()->getResultArray(),
+                               
+            // 2. Data untuk Kartu KPI (Total per Klaster)
             'rekap' => $db->table('tb_klaster_kmeans')
-                          ->select('label_klaster, COUNT(*) as total')
-                          ->groupBy('label_klaster')->get()->getResultArray()
+                           ->select('label_klaster, COUNT(*) as total')
+                           ->groupBy('label_klaster')->get()->getResultArray(),
+                           
+            // 3. Kargo Data Baru Khusus untuk Grafik Spatial Intelligence
+            'chart_spasial' => $db->table('tb_klaster_kmeans k')
+                                 ->select('k.velocity_score as x, b.stok_aktual as y, k.label_klaster, b.nama_barang')
+                                 ->join('tb_barang b', 'b.id_barang = k.id_barang')
+                                 ->get()->getResultArray()
         ];
+        
         return view('analitik/index', $data);
     }
 
@@ -31,12 +43,13 @@ class Analitik extends BaseController
 
     private function generate_klasterisasi_kmeans()
     {
-        $analitikModel = new AnalitikModel();
+        // Panggil class secara absolut untuk menghindari error namespace
+        $analitikModel = new \App\Models\AnalitikModel();
         $data_mentah = $analitikModel->get_historis_velocity();
 
-        // K-Means butuh minimal data sejumlah klaster (3)
+        // Validasi: Pastikan ada minimal 3 data berbeda agar AI bisa bekerja
         if (count($data_mentah) < 3) {
-            return;
+            return; // Hentikan proses jika data terlalu sedikit
         }
 
         $samples = [];
@@ -47,33 +60,73 @@ class Analitik extends BaseController
             $ids[] = $row['id_barang'];
         }
 
-        // Eksekusi Algoritma
-        $kmeans = new KMeans(3);
+        // Eksekusi Algoritma K-Means AI
+        $kmeans = new \Phpml\Clustering\KMeans(3);
         $clusters = $kmeans->cluster($samples);
 
         $db = \Config\Database::connect();
 
+        // 1. Logika Pelabelan AI yang Aman (Tahan terhadap Array Kosong)
+        $cluster_averages = [];
+        foreach ($clusters as $index => $points) {
+            $sum_velocity = 0;
+            foreach ($points as $p) {
+                $sum_velocity += $p[0];
+            }
+            $cluster_averages[$index] = count($points) > 0 ? ($sum_velocity / count($points)) : 0;
+        }
+
+        // Urutkan nilai rata-rata dari terkecil ke terbesar
+        asort($cluster_averages);
+
+        // Pemetaan dinamis (Anti "Undefined Array Key")
+        $label_names = ['Dead Stock', 'Slow Moving', 'Fast Moving'];
+        $label_mapping = [];
+        $i = 0;
+        foreach ($cluster_averages as $original_index => $avg) {
+            $label_mapping[$original_index] = $label_names[$i] ?? 'Fast Moving';
+            $i++;
+        }
+
+        $temp_samples = $samples;
+
+        // 2. Eksekusi ke Database yang Aman dengan Query Builder CI4
         foreach ($clusters as $index_klaster => $cluster_points) {
+            // Ambil label yang sesuai, jika error fallback ke 'Slow Moving'
+            $label = $label_mapping[$index_klaster] ?? 'Slow Moving';
+
             foreach ($cluster_points as $point) {
-                // Cari ID barang yang sesuai dengan koordinat point
-                $key = array_search($point, $samples);
-                $id_barang = $ids[$key];
-                $velocity = $point[0];
+                $key = array_search($point, $temp_samples);
 
-                // Penentuan Label (Urutan default K-Means)
-                $label = 'Klaster ' . ($index_klaster + 1);
-                if ($index_klaster == 0) $label = 'Dead Stock';
-                if ($index_klaster == 1) $label = 'Slow Moving';
-                if ($index_klaster == 2) $label = 'Fast Moving';
+                if ($key !== false) {
+                    $id_barang = $ids[$key];
+                    $velocity = $point[0];
 
-                // Brute Force SQL: Insert jika baru, Update jika ID sudah ada
-                $sql = "INSERT INTO tb_klaster_kmeans (id_barang, velocity_score, label_klaster) 
-                        VALUES (?, ?, ?) 
-                        ON DUPLICATE KEY UPDATE 
-                        velocity_score = VALUES(velocity_score), 
-                        label_klaster = VALUES(label_klaster)";
-                
-                $db->query($sql, [$id_barang, $velocity, $label]);
+                    // Cegah bug duplikasi ID
+                    unset($temp_samples[$key]);
+
+                    // Pengecekan data murni gaya CodeIgniter 4 (Bebas SQL Error)
+                    $cek_data = $db->table('tb_klaster_kmeans')
+                        ->where('id_barang', $id_barang)
+                        ->countAllResults();
+
+                    if ($cek_data > 0) {
+                        // Jika data sudah ada, lakukan UPDATE
+                        $db->table('tb_klaster_kmeans')
+                            ->where('id_barang', $id_barang)
+                            ->update([
+                                'velocity_score' => $velocity,
+                                'label_klaster'  => $label
+                            ]);
+                    } else {
+                        // Jika data baru, lakukan INSERT
+                        $db->table('tb_klaster_kmeans')->insert([
+                            'id_barang'      => $id_barang,
+                            'velocity_score' => $velocity,
+                            'label_klaster'  => $label
+                        ]);
+                    }
+                }
             }
         }
     }

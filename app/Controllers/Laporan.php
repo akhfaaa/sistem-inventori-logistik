@@ -17,6 +17,7 @@ class Laporan extends BaseController
         return view('laporan/index', $data);
     }
 
+   
     public function generate($tipe)
     {
         $db = \Config\Database::connect();
@@ -51,7 +52,7 @@ class Laporan extends BaseController
                 $data['laporan'] = $db->table('tb_keluar k')->select('k.tanggal_keluar AS "Waktu Distribusi", b.kode_barang AS "SKU", b.nama_barang AS "Nama Barang", c.nama_customer AS "Tujuan/Customer", k.qty_keluar AS "Volume Keluar"')->join('tb_barang b', 'b.id_barang = k.id_barang')->join('tb_customer c', 'c.id_customer = k.id_customer')->orderBy('k.tanggal_keluar', 'DESC')->get()->getResultArray();
                 break;
             case 'stok_kritis':
-                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "Kode SKU", nama_barang AS "Nama Barang", batas_stok_kritis AS "Ambang Batas Kritis", stok_aktual AS "Sisa Stok Aktual"')->where('stok_aktual <= batas_stok_kritis')->get()->getResultArray();
+                $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "Kode SKU", nama_barang AS "Nama Barang", stok_minimum AS "Ambang Batas Kritis", stok_aktual AS "Sisa Stok Aktual"')->where('stok_aktual <= stok_minimum')->get()->getResultArray();
                 break;
             case 'fast_moving':
                 $data['laporan'] = $db->table('tb_klaster_kmeans k')->select('b.kode_barang AS "SKU", b.nama_barang AS "Nama Produk", k.velocity_score AS "Skor Velositas", b.stok_aktual AS "Stok Saat Ini"')->join('tb_barang b', 'b.id_barang = k.id_barang')->where('k.label_klaster', 'Fast Moving')->orderBy('k.velocity_score', 'DESC')->get()->getResultArray();
@@ -66,7 +67,21 @@ class Laporan extends BaseController
                 $data['laporan'] = $db->table('tb_retur r')->select('r.tanggal_retur AS "Waktu Anomali", b.nama_barang AS "Produk Terkait", r.qty_retur AS "Volume", r.alasan AS "Keterangan", r.aksi_stok AS "Tindakan Sistem"')->join('tb_barang b', 'b.id_barang = r.id_barang')->orderBy('r.tanggal_retur', 'DESC')->get()->getResultArray();
                 break;
             case 'kinerja_supplier':
-                $data['laporan'] = $db->table('tb_masuk m')->select('s.nama_supplier AS "Identitas Pemasok", COUNT(m.id_masuk) AS "Frekuensi Transaksi", SUM(m.qty_masuk) AS "Total Volume Pasokan"')->join('tb_supplier s', 's.id_supplier = m.id_supplier')->groupBy('m.id_supplier')->orderBy('Total Volume Pasokan', 'DESC')->get()->getResultArray();
+                // Perbaikan: Alias tidak menggunakan spasi pada orderBy
+                $data['laporan'] = $db->table('tb_masuk m')
+                                      ->select('s.nama_supplier AS "Identitas Pemasok", COUNT(m.id_masuk) AS "Frekuensi Transaksi", SUM(m.qty_masuk) AS total_volume_pasokan')
+                                      ->join('tb_supplier s', 's.id_supplier = m.id_supplier')
+                                      ->groupBy('m.id_supplier')
+                                      ->orderBy('total_volume_pasokan', 'DESC')
+                                      ->get()->getResultArray();
+                
+                // Kembalikan nama alias kolom ke bentuk string berspasi (opsional) agar tampilan pada view cetak_pdf sama
+                if(!empty($data['laporan'])) {
+                    foreach($data['laporan'] as &$row) {
+                        $row['Total Volume Pasokan'] = $row['total_volume_pasokan'];
+                        unset($row['total_volume_pasokan']);
+                    }
+                }
                 break;
             case 'valuasi_aset':
                 $data['laporan'] = $db->table('tb_barang')->select('kode_barang AS "SKU", nama_barang AS "Nama Produk", stok_aktual AS "Volume Aset", harga_beli AS "Nilai Satuan", (stok_aktual * harga_beli) AS "Total Nilai Kapital"')->get()->getResultArray();
@@ -94,6 +109,6 @@ class Laporan extends BaseController
         $dompdf->render();
 
         $namaFile = "DOC_" . strtoupper($tipe) . "_" . date('Ymd_Hi') . ".pdf";
-        return $dompdf->stream($namaFile, ["Attachment" => false]); // Set true jika ingin langsung otomatis terunduh
+        return $dompdf->stream($namaFile, ["Attachment" => false]); 
     }
 }

@@ -63,7 +63,7 @@
                         </td>
                         <td class="px-8 py-5">
                             <div class="flex justify-center items-center gap-2">
-                                <button onclick="openEditSku(<?= $b['id_barang'] ?>, '<?= $b['kode_barang'] ?>', '<?= htmlspecialchars($b['nama_barang'], ENT_QUOTES) ?>', '<?= $b['id_kategori'] ?>', '<?= $b['id_rak'] ?>', <?= $b['stok_aktual'] ?>, <?= $b['batas_stok_kritis'] ?>, <?= $b['harga_beli'] ?>)" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit Item">
+                                <button onclick="openEditSku(<?= $b['id_barang'] ?>, '<?= $b['kode_barang'] ?>', '<?= htmlspecialchars($b['nama_barang'], ENT_QUOTES) ?>', '<?= $b['id_kategori'] ?>', '<?= $b['id_rak'] ?>', <?= $b['stok_aktual'] ?>, <?= $b['stok_minimum'] ?>, <?= $b['harga_beli'] ?>)" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit Item">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
                                 <a href="<?= base_url('barang/delete/' . $b['id_barang']) ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus SKU ini secara permanen?')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Delete SKU">
@@ -128,7 +128,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Safety Stock</label>
-                    <input type="number" name="batas_stok_kritis" required placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none">
+                    <input type="number" name="stok_minimum" required placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Price (HPP)</label>

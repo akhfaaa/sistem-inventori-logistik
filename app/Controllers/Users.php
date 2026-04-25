@@ -6,7 +6,7 @@ class Users extends BaseController
     public function index()
     {
         // Proteksi: Hanya Admin yang boleh masuk
-        if (session()->get('role') !== 'Admin') {
+        if (session()->get('role') !== 'Administrator') {
             return redirect()->to('/dashboard')->with('error', 'Akses Ditolak! Menu ini khusus Administrator.');
         }
 

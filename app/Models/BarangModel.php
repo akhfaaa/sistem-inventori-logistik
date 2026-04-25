@@ -7,7 +7,7 @@ class BarangModel extends Model
 {
     protected $table            = 'tb_barang';
     protected $primaryKey       = 'id_barang';
-    protected $allowedFields    = ['kode_barang', 'nama_barang', 'id_kategori', 'harga_beli', 'stok_aktual', 'batas_stok_kritis'];
+    protected $allowedFields = ['kode_barang', 'nama_barang', 'id_kategori', 'id_rak', 'harga_beli', 'stok_aktual', 'stok_minimum'];
 
     // Fungsi khusus untuk White Box Coding Anda
     public function kurangiStok($id_barang, $qty_keluar)
