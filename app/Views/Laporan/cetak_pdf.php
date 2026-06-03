@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title><?= $title ?></title>
+    <title><?= $title ?? 'Laporan' ?></title>
     <style>
         @page { margin: 1.5cm; }
         body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.4; font-size: 11px; margin: 0; }
@@ -46,7 +46,7 @@
     </div>
 
     <div class="report-title">
-        <h3><?= $title ?></h3>
+        <h3><?= $title ?? 'Laporan' ?></h3>
         <p>ID DOKUMEN: SILABAK-<?= date('Ymd') ?>-<?= strtoupper(substr(md5(time()), 0, 5)) ?></p>
     </div>
 

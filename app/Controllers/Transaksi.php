@@ -1,41 +1,49 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Models\BarangModel;
-// Nanti kita akan tambahkan TransaksiModel di sini
 
 class Transaksi extends BaseController
 {
+    /**
+     * Proses transaksi pengurangan stok barang keluar.
+     * Memvalidasi ketersediaan stok dan mengurangi stok aktual.
+     * Juga memeriksa apakah stok mencapai batas kritis untuk notifikasi.
+     *
+     * @return string Status transaksi (sukses atau error)
+     */
     public function proses_barang_keluar()
     {
-        // Memanggil Model
+        // Inisialisasi model barang
         $barangModel = new BarangModel();
 
-        // Mengambil inputan dari View (Form HTML)
+        // Ambil data input dari form HTML
         $id_barang = $this->request->getPost('id_barang');
         $qty_keluar = $this->request->getPost('qty');
 
-        // Mengambil data barang saat ini
+        // Ambil data barang saat ini dari database
         $barang = $barangModel->find($id_barang);
 
-        // Pengecekan logika ketersediaan stok (White Box)
+        // Validasi ketersediaan stok (White Box Testing)
         if ($barang['stok_aktual'] >= $qty_keluar) {
-            
-            // Eksekusi mutasi (Mengurangi stok)
+
+            // Eksekusi pengurangan stok
             $barangModel->kurangiStok($id_barang, $qty_keluar);
 
-            // Cek apakah sisa stok menyentuh batas kritis
+            // Hitung sisa stok setelah transaksi
             $sisa_stok = $barang['stok_aktual'] - $qty_keluar;
+
+            // Periksa apakah sisa stok mencapai batas kritis untuk trigger alert
             if ($sisa_stok <= $barang['batas_stok_kritis']) {
-                // Di sini nanti kita buatkan trigger Notifikasi/Alert
-                log_message('warning', "Stok Kritis untuk Barang ID: " . $id_barang);
+                log_message('warning', 'Stok Kritis untuk Barang ID: ' . $id_barang);
             }
 
-            return "Transaksi Berhasil. Stok telah diperbarui.";
+            return 'Transaksi Berhasil. Stok telah diperbarui.';
 
         } else {
-            // Fallback galat jika stok kurang
-            return "Error: Kuantitas melebihi persediaan gudang aktual!";
+            // Kembalikan error jika stok tidak mencukupi
+            return 'Error: Kuantitas melebihi persediaan gudang aktual!';
         }
     }
 }

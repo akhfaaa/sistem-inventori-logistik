@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title><?= $title ?></title>
+    <title><?= $title ?? 'Executive Summary' ?></title>
     <style>
         body { font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.5; font-size: 12px; }
         .header { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 10px; margin-bottom: 20px; }
@@ -27,7 +27,7 @@
     <div class="header">
         <h1>Executive Summary - SILABAK</h1>
         <p>Sistem Informasi Logistik dan Analitik Barang K-Means<br>
-        Bapekom PU Wilayah VII Banjarmasin | Periode: <?= $tanggal ?></p>
+        Bapekom PU Wilayah VII Banjarmasin | Periode: <?= $tanggal ?? date('F Y') ?></p>
     </div>
 
     <div class="section-title">A. STATUS KEUANGAN & OPERASIONAL (BULAN INI)</div>
@@ -41,8 +41,8 @@
             <td>
                 <div class="stat-label">Volume Mutasi Bulanan</div>
                 <div class="stat-value" style="font-size: 18px;">
-                    Masuk: +<?= $inbound ?> Unit<br>
-                    Keluar: -<?= $outbound ?> Unit
+                    Masuk: +<?= $inbound ?? 0 ?> Unit<br>
+                    Keluar: -<?= $outbound ?? 0 ?> Unit
                 </div>
             </td>
         </tr>
@@ -58,9 +58,9 @@
             </tr>
         </thead>
         <tbody>
-            <?php if(empty($kmeans)): ?>
+            <?php if(empty($kmeans ?? [])): ?>
                 <tr><td colspan="3" style="text-align:center;">Data K-Means belum diproses.</td></tr>
-            <?php else: foreach($kmeans as $k): ?>
+            <?php else: foreach($kmeans ?? [] as $k): ?>
                 <tr>
                     <td style="font-weight: bold;"><?= $k['label_klaster'] ?></td>
                     <td class="text-right font-bold"><?= $k['total'] ?></td>
@@ -87,9 +87,9 @@
             </tr>
         </thead>
         <tbody>
-            <?php if(empty($kritis)): ?>
+            <?php if(empty($kritis ?? [])): ?>
                 <tr><td colspan="4" style="text-align:center;">Tidak ada stok kritis. Kondisi aman.</td></tr>
-            <?php else: foreach($kritis as $krt): ?>
+            <?php else: foreach($kritis ?? [] as $krt): ?>
                 <tr>
                     <td><?= $krt['kode_barang'] ?></td>
                     <td><?= $krt['nama_barang'] ?></td>
@@ -101,7 +101,7 @@
     </table>
 
     <div class="footer">
-        <p>Banjarmasin, <?= $tanggal ?></p>
+        <p>Banjarmasin, <?= $tanggal ?? date('d F Y') ?></p>
         <p><b>Kepala Balai Pengembangan Kompetensi PU Wil. VII Banjarmasin</b></p>
         <div class="ttd-space"></div>
         <p>____________________________________</p>

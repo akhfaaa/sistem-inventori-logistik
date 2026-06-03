@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title><?= $title ?></title>
+    <title><?= $title ?? 'Master Inventori' ?></title>
     <style>
         body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 12px; color: #333; }
         
@@ -37,7 +37,7 @@
         <p>Sistem Informasi Manajemen Logistik (Logistics Hub Enterprise)</p>
     </div>
 
-    <div class="judul-laporan"><?= $title ?></div>
+    <div class="judul-laporan"><?= $title ?? 'Master Inventori' ?></div>
     
     <p>Dicetak pada: <?= date('d F Y H:i:s') ?><br>Oleh: <?= session()->get('nama_lengkap') ?> (<?= session()->get('role') ?>)</p>
 
@@ -53,7 +53,7 @@
             </tr>
         </thead>
         <tbody>
-            <?php $no=1; foreach($barang as $b): ?>
+            <?php $no=1; foreach($barang ?? [] as $b): ?>
             <tr>
                 <td class="text-center"><?= $no++ ?></td>
                 <td class="text-center"><b><?= $b['kode_barang'] ?></b></td>

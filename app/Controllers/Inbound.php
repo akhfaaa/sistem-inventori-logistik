@@ -7,79 +7,100 @@ use App\Models\BarangModel;
 
 class Inbound extends BaseController
 {
+    /**
+     * Tampilkan halaman inbound logistik.
+     * Menampilkan daftar barang, supplier, riwayat masuk, dan rekomendasi supplier.
+     */
     public function index()
     {
         $db = \Config\Database::connect();
 
-        // 1. Ambil Data Barang & Supplier untuk Dropdown
-        $data['barang']   = $db->table('tb_barang')->get()->getResultArray();
-        $data['supplier'] = $db->table('tb_supplier')->get()->getResultArray();
+        // Ambil data barang dan supplier untuk dropdown form
+        $data['barang'] = $db->table('tb_barang')
+            ->get()
+            ->getResultArray();
 
-        // 2. Ambil Riwayat Transaksi Masuk (Join untuk informasi lengkap)
-        $data['riwayat']  = $db->table('tb_masuk m')
+        $data['supplier'] = $db->table('tb_supplier')
+            ->get()
+            ->getResultArray();
+
+        // Ambil riwayat transaksi masuk dengan informasi lengkap
+        // Join dengan tabel barang dan supplier untuk mendapatkan nama
+        $data['riwayat'] = $db->table('tb_masuk m')
             ->select('m.*, b.nama_barang, s.nama_supplier')
             ->join('tb_barang b', 'b.id_barang = m.id_barang')
             ->join('tb_supplier s', 's.id_supplier = m.id_supplier')
             ->orderBy('m.tanggal_masuk', 'DESC')
             ->limit(10)
-            ->get()->getResultArray();
+            ->get()
+            ->getResultArray();
 
-        // 3. Hitung Rekomendasi SPK SAW
+        // Hitung rekomendasi supplier terbaik menggunakan metode SAW
         $spkModel = new SpkModel();
         $rekomendasi = $spkModel->hitungSAW();
 
         // Ambil peringkat pertama (skor tertinggi) sebagai rekomendasi utama
-        $data['best_supplier'] = !empty($rekomendasi) ? $rekomendasi[0] : null;
+        $data['best_supplier'] = ! empty($rekomendasi) ? $rekomendasi[0] : null;
 
         $data['title'] = 'Stock Inbound | Logistics Hub';
+
         return view('Inbound/index', $data);
     }
 
+    /**
+     * Simpan transaksi penerimaan barang (inbound).
+     * Melakukan validasi, update stok, dan mencatat log aktivitas dalam satu transaksi database.
+     */
     public function store()
     {
         $db = \Config\Database::connect();
 
-        $id_barang   = $this->request->getPost('id_barang');
+        // Ambil data dari form submission
+        $id_barang = $this->request->getPost('id_barang');
         $id_supplier = $this->request->getPost('id_supplier');
-        $qty_masuk   = $this->request->getPost('qty_masuk');
+        $qty_masuk = $this->request->getPost('qty_masuk');
 
-        // 1. Validasi Sisi Server
+        // Validasi data input
         if (empty($id_barang) || empty($id_supplier) || $qty_masuk < 1) {
             return redirect()->back()->with('error', 'Validasi Gagal: Formulir tidak lengkap atau kuantitas masuk tidak logis!');
         }
 
-        $barang = $db->table('tb_barang')->where('id_barang', $id_barang)->get()->getRowArray();
+        // Ambil data barang untuk keperluan logging
+        $barang = $db->table('tb_barang')
+            ->where('id_barang', $id_barang)
+            ->get()
+            ->getRowArray();
 
-        // 2. Mulai Transaksi Database
+        // Mulai transaksi database untuk menjamin konsistensi data
         $db->transStart();
 
-        // A. Catat histori penerimaan
+        // Catat histori penerimaan barang
         $db->table('tb_masuk')->insert([
             'id_barang'     => $id_barang,
             'id_supplier'   => $id_supplier,
             'qty_masuk'     => $qty_masuk,
             'tanggal_masuk' => date('Y-m-d H:i:s'),
-            'id_user'       => session()->get('id_user')
+            'id_user'       => session()->get('id_user'),
         ]);
 
-        // B. Tambahkan stok aktual ke tabel master barang
+        // Tambahkan kuantitas ke stok aktual barang
         $db->table('tb_barang')
             ->where('id_barang', $id_barang)
             ->set('stok_aktual', 'stok_aktual + ' . $qty_masuk, false)
             ->update();
 
-        // C. Catat Log Audit Sistem
+        // Catat aktivitas pengguna ke tabel log audit
         $db->table('tb_log_aktivitas')->insert([
             'id_user' => session()->get('id_user'),
             'aksi'    => 'Penerimaan logistik: ' . ($barang['nama_barang'] ?? 'Aset ID ' . $id_barang) . ' (' . $qty_masuk . ' unit)',
             'modul'   => 'Inbound Logistik',
-            'waktu'   => date('Y-m-d H:i:s')
+            'waktu'   => date('Y-m-d H:i:s'),
         ]);
 
-        // Selesaikan Transaksi
+        // Selesaikan transaksi database
         $db->transComplete();
 
-        // Validasi kegagalan Query
+        // Periksa status transaksi
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem (Database Error). Registrasi stok dibatalkan otomatis.');
         }
@@ -87,3 +108,4 @@ class Inbound extends BaseController
         return redirect()->to('/inbound')->with('success', 'Penerimaan barang berhasil diregistrasi dan stok telah ditambahkan ke gudang.');
     }
 }
+

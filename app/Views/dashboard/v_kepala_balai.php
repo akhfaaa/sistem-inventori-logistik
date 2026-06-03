@@ -37,13 +37,13 @@
             
             <div class="relative z-10">
                 <div class="flex justify-between items-start">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Kapitalisasi Aset Gudang</h3>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Kapitalisasi Aset Bapekom PU Wil.7 BJM</h3>
                     <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-lg border border-emerald-500/20 uppercase tracking-widest">Real-Time Valuation</span>
                 </div>
                 <div class="flex items-baseline gap-4 mt-4">
                     <span class="text-3xl font-bold text-amber-500">Rp</span>
                     <span class="text-7xl font-black tracking-tighter text-white drop-shadow-xl">
-                        <?= number_format($total_nilai, 0, ',', '.') ?>
+                        <?= number_format($total_nilai ?? 0, 0, ',', '.') ?>
                     </span>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                         'Slow Moving' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'border' => 'border-amber-100'],
                         'Dead Stock'  => ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'border' => 'border-rose-100']
                     ];
-                    foreach($rekap_kmeans as $r): 
+                    foreach($rekap_kmeans ?? [] as $r): 
                         $c = $colors[$r['label_klaster']] ?? ['bg' => 'bg-slate-50', 'text' => 'text-slate-700', 'border' => 'border-slate-100'];
                     ?>
                     <div class="flex items-center justify-between p-4 rounded-2xl border <?= $c['bg'] ?> <?= $c['border'] ?> transition-transform hover:scale-[1.02] cursor-default">

@@ -61,7 +61,7 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Aset (SKU)</label>
                     <select name="id_barang" id="sku_select" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:ring-2 focus:ring-amber-400 outline-none transition-all">
                         <option value="">-- Cari atau Scan SKU --</option>
-                        <?php foreach($barang as $b): ?>
+                        <?php foreach($barang ?? [] as $b): ?>
                             <option value="<?= $b['id_barang'] ?>">[<?= $b['kode_barang'] ?>] - <?= $b['nama_barang'] ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -71,7 +71,7 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Pemasok Logistik</label>
                     <select name="id_supplier" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:ring-2 focus:ring-amber-400 outline-none transition-all">
                         <option value="">-- Pilih Pemasok --</option>
-                        <?php foreach($supplier as $s): ?>
+                        <?php foreach($supplier ?? [] as $s): ?>
                             <option value="<?= $s['id_supplier'] ?>"><?= $s['nama_supplier'] ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -106,12 +106,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        <?php if(empty($riwayat)): ?>
+                        <?php if(empty($riwayat ?? [])): ?>
                             <tr>
                                 <td colspan="3" class="px-6 py-10 text-center text-sm font-medium text-slate-400">Belum ada aktivitas penerimaan.</td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach($riwayat as $r): ?>
+                            <?php foreach($riwayat ?? [] as $r): ?>
                                 <tr class="hover:bg-slate-50/50 transition-colors">
                                     <td class="px-6 py-4">
                                         <span class="text-sm font-bold text-slate-700 block"><?= date('d M Y', strtotime($r['tanggal_masuk'])) ?></span>

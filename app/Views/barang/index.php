@@ -40,7 +40,7 @@
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Filter:</span>
                 <select id="categoryFilter" class="w-full sm:w-56 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-amber-400 outline-none cursor-pointer shadow-sm transition-all">
                     <option value="ALL">Semua Kategori</option>
-                    <?php foreach($kategori as $k): ?>
+                    <?php foreach($kategori ?? [] as $k): ?>
                         <option value="<?= $k['nama_kategori'] ?>"><?= $k['nama_kategori'] ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -60,12 +60,12 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    <?php if(empty($barang)): ?>
+                    <?php if(empty($barang ?? [])): ?>
                         <tr id="defaultEmptyRow">
                             <td colspan="5" class="px-6 py-10 text-center text-sm font-bold text-slate-400">Sistem belum memiliki data master barang.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($barang as $b) : ?>
+                        <?php foreach ($barang ?? [] as $b) : ?>
                             <tr class="asset-row hover:bg-slate-50/50 transition-colors group" 
                                 data-nama="<?= strtolower($b['nama_barang']) ?>" 
                                 data-kode="<?= strtolower($b['kode_barang']) ?>" 
@@ -156,7 +156,7 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Kategori</label>
                     <select name="id_kategori" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-400 outline-none">
                         <option value="">Pilih Kategori...</option>
-                        <?php foreach($kategori as $k): ?>
+                        <?php foreach($kategori ?? [] as $k): ?>
                             <option value="<?= $k['id_kategori'] ?>"><?= $k['nama_kategori'] ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -165,7 +165,7 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Penempatan Rak</label>
                     <select name="id_rak" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-400 outline-none">
                         <option value="">-- Kosongkan Jika Belum Ada --</option>
-                        <?php foreach($rak as $r): ?>
+                        <?php foreach($rak ?? [] as $r): ?>
                             <option value="<?= $r['id_rak'] ?>"><?= $r['nama_rak'] ?> - <?= $r['lokasi'] ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -193,8 +193,8 @@
     </div>
 </div>
 
-<?php if(!empty($barang)): ?>
-    <?php foreach ($barang as $b) : ?>
+<?php if(!empty($barang ?? [])): ?>
+    <?php foreach ($barang ?? [] as $b) : ?>
     <div id="modalEdit<?= $b['id_barang'] ?>" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 transform transition-all">
             <div class="flex justify-between items-center mb-6">
@@ -219,7 +219,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Kategori</label>
                         <select name="id_kategori" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-400 outline-none">
-                            <?php foreach($kategori as $k): ?>
+                            <?php foreach($kategori ?? [] as $k): ?>
                                 <option value="<?= $k['id_kategori'] ?>" <?= ($b['id_kategori'] == $k['id_kategori']) ? 'selected' : '' ?>><?= $k['nama_kategori'] ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -228,7 +228,7 @@
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Penempatan Rak</label>
                         <select name="id_rak" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-400 outline-none">
                             <option value="">-- Kosongkan Jika Belum Ada --</option>
-                            <?php foreach($rak as $r): ?>
+                            <?php foreach($rak ?? [] as $r): ?>
                                 <option value="<?= $r['id_rak'] ?>" <?= ($b['id_rak'] == $r['id_rak']) ? 'selected' : '' ?>><?= $r['nama_rak'] ?> - <?= $r['lokasi'] ?></option>
                             <?php endforeach; ?>
                         </select>

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Models\AnalitikModel;
 
 // Memanggil Library Machine Learning sesuai instruksi dokumen
@@ -11,10 +12,10 @@ class Analitik extends BaseController
     public function generate_klasterisasi_kmeans()
     {
         $analitikModel = new AnalitikModel();
-        
+
         // 1. Menarik dataset dari db_inventori
         $data_mentah = $analitikModel->get_historis_velocity();
-        
+
         if (empty($data_mentah)) {
             return "Dataset kosong, tidak bisa melakukan klasterisasi.";
         }
@@ -23,11 +24,11 @@ class Analitik extends BaseController
         // Kita gunakan [velocity, stok_aktual] sebagai titik koordinat matriks
         $samples = [];
         $mapping_id = []; // Untuk melacak ID barang setelah di-klaster
-        
+
         foreach ($data_mentah as $index => $row) {
             $samples[] = [(float)$row['velocity'], (float)$row['stok_aktual']];
             $mapping_id[$index] = [
-                'id' => $row['id_barang'], 
+                'id' => $row['id_barang'],
                 'velocity' => $row['velocity']
             ];
         }

@@ -38,21 +38,21 @@
                 <div class="flex items-center gap-4 mb-4">
                     <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg></div>
                     <div>
-                        <p class="text-3xl font-black leading-none"><?= $transaksi_masuk_hari_ini ?></p>
+                        <p class="text-3xl font-black leading-none"><?= $transaksi_masuk_hari_ini ?? 0 ?></p>
                         <p class="text-[9px] uppercase font-bold text-slate-400 tracking-widest mt-1">Trx Masuk</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg></div>
                     <div>
-                        <p class="text-3xl font-black leading-none"><?= $transaksi_keluar_hari_ini ?></p>
+                        <p class="text-3xl font-black leading-none"><?= $transaksi_keluar_hari_ini ?? 0 ?></p>
                         <p class="text-[9px] uppercase font-bold text-slate-400 tracking-widest mt-1">Trx Keluar</p>
                     </div>
                 </div>
             </div>
             <div class="relative z-10 pt-6 border-t border-slate-800">
                 <p class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-1">Total Katalog</p>
-                <p class="text-xl font-black"><?= $total_barang ?> <span class="text-[10px] text-slate-400 font-normal">SKU</span></p>
+                <p class="text-xl font-black"><?= $total_barang ?? 0 ?> <span class="text-[10px] text-slate-400 font-normal">SKU</span></p>
             </div>
         </div>
 
@@ -60,12 +60,12 @@
             <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Daftar Cek Fisik (Stok Menipis)</h3>
             
             <div class="flex-1 space-y-3">
-                <?php if(empty($stok_menipis)): ?>
+                <?php if(empty($stok_menipis ?? [])): ?>
                     <div class="flex flex-col items-center justify-center h-full text-slate-400 p-8 border-2 border-dashed border-slate-100 rounded-2xl">
                         <svg class="w-8 h-8 mb-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <p class="text-[11px] font-bold uppercase tracking-widest">Semua stok mencukupi</p>
                     </div>
-                <?php else: foreach($stok_menipis as $sm): ?>
+                <?php else: foreach($stok_menipis ?? [] as $sm): ?>
                     <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-white hover:shadow-md hover:border-amber-200 border border-transparent transition-all cursor-default">
                         <div class="flex items-center gap-4">
                             <div class="w-8 h-8 bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-black">!</div>
