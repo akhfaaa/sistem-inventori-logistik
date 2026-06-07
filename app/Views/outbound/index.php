@@ -41,11 +41,13 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Aset (Stok Tersedia)</label>
                     <select name="id_barang" id="sku_select" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-400 outline-none transition-all">
                         <option value="">-- Cari atau Scan SKU --</option>
-                        <?php foreach($barang as $b): ?>
+                        <?php if(!empty($barang)): foreach($barang as $b): ?>
                             <option value="<?= $b['id_barang'] ?>">
                                 [<?= $b['kode_barang'] ?>] - <?= $b['nama_barang'] ?> (Sisa: <?= $b['stok_aktual'] ?>)
                             </option>
-                        <?php endforeach; ?>
+                        <?php endforeach; else: ?>
+                            <option value="">Tidak ada aset tersedia</option>
+                        <?php endif; ?>
                     </select>
                 </div>
                 
@@ -53,9 +55,11 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Tujuan Distribusi / Unit</label>
                     <select name="id_customer" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-400 outline-none transition-all">
                         <option value="">-- Pilih Tujuan --</option>
-                        <?php foreach($customer as $c): ?>
+                        <?php if(!empty($customer)): foreach($customer as $c): ?>
                             <option value="<?= $c['id_customer'] ?>"><?= $c['nama_customer'] ?></option>
-                        <?php endforeach; ?>
+                        <?php endforeach; else: ?>
+                            <option value="">Tidak ada tujuan tersedia</option>
+                        <?php endif; ?>
                     </select>
                 </div>
                 
