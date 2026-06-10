@@ -1,6 +1,8 @@
 <?= $this->extend('layout/main') ?>
 <?= $this->section('content') ?>
 
+<?php $users = $users ?? []; ?>
+
 <div class="p-8">
     <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
